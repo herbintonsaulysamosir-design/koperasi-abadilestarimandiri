@@ -33,7 +33,7 @@
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 rounded-lg overflow-hidden border border-slate-100 shadow-sm">
-                    <img src="https://i.ibb.co.com/gYkrygc/Whats-App-Image-2026-05-03-at-13-54-32.jpg" alt="Logo Koperasi Abadi Lestari Mandiri" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=KALM&background=1d4ed8&color=fff'">
+                    <img src="https://i.ibb.co.com/gYkrygc/Whats-App-Image-2026-05-03-at-13-54-32.jpg" alt="Logo" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=KALM&background=1d4ed8&color=fff'">
                 </div>
                 <div>
                     <h1 class="text-lg font-bold leading-tight">Koperasi Abadi Lestari Mandiri</h1>
@@ -59,18 +59,34 @@
         
         <!-- TAB 1: BUKU KAS -->
         <div id="tab-kas" class="tab-content">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Row Atas Statistik -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-blue-600">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Piutang Aktif</p>
-                    <h2 id="kas-saldo" class="text-2xl font-black text-blue-700">Rp 0</h2>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Piutang Aktif</p>
+                    <h2 id="kas-saldo" class="text-xl font-black text-blue-700">Rp 0</h2>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-600">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Pinjaman Pokok</p>
+                    <h2 id="kas-total-pinjaman" class="text-xl font-black text-indigo-700">Rp 0</h2>
                 </div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                     <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-1">Total Pemasukan</p>
-                    <h2 id="kas-masuk" class="text-2xl font-black text-emerald-600">Rp 0</h2>
+                    <h2 id="kas-masuk" class="text-xl font-black text-emerald-600">Rp 0</h2>
                 </div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                     <p class="text-xs font-bold text-rose-500 uppercase tracking-wider mb-1">Total Pengeluaran</p>
-                    <h2 id="kas-keluar" class="text-2xl font-black text-rose-600">Rp 0</h2>
+                    <h2 id="kas-keluar" class="text-xl font-black text-rose-600">Rp 0</h2>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-slate-100/50 p-4 rounded-xl border border-dashed border-slate-300">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Tabungan Terkumpul</p>
+                    <h3 id="stat-tabungan" class="text-lg font-bold text-blue-600">Rp 0</h3>
+                </div>
+                <div class="bg-slate-100/50 p-4 rounded-xl border border-dashed border-slate-300">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Biaya Admin</p>
+                    <h3 id="stat-admin" class="text-lg font-bold text-amber-600">Rp 0</h3>
                 </div>
             </div>
 
@@ -122,7 +138,7 @@
                     </div>
                 </div>
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden overflow-x-auto">
                         <table class="w-full text-left">
                             <thead class="bg-slate-50">
                                 <tr>
@@ -160,20 +176,52 @@
                                     <input type="number" id="loan-interest" required value="20" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none">
                                 </div>
                             </div>
-                            <div class="bg-blue-50 p-4 rounded-xl">
-                                <p class="text-xs text-blue-700 font-bold uppercase mb-1">Setoran Harian</p>
-                                <p id="loan-preview" class="text-xl font-black text-blue-800">Rp 0</p>
+
+                            <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
+                                <div class="flex justify-between items-center text-[11px] font-bold">
+                                    <span class="text-slate-500 uppercase">Admin (5%)</span>
+                                    <span id="preview-admin" class="text-amber-600">Rp 0</span>
+                                </div>
+                                <div class="flex justify-between items-center text-[11px] font-bold border-b border-slate-200 pb-2">
+                                    <span class="text-slate-500 uppercase">Tabungan (5%)</span>
+                                    <span id="preview-tabungan" class="text-blue-600">Rp 0</span>
+                                </div>
+                                <div class="flex justify-between items-center pt-1 font-black text-sm">
+                                    <span class="text-slate-700">Uang Diterima</span>
+                                    <span id="preview-received" class="text-emerald-600">Rp 0</span>
+                                </div>
                             </div>
-                            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100">Proses Pinjaman</button>
+
+                            <div class="bg-blue-600 p-4 rounded-xl shadow-inner">
+                                <p class="text-xs text-blue-100 font-bold uppercase mb-1">Angsuran Harian</p>
+                                <p id="loan-preview" class="text-xl font-black text-white">Rp 0</p>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-700 text-white py-3 rounded-xl font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-100">Proses Pencairan</button>
                         </form>
                     </div>
                 </div>
-                <div class="lg:col-span-2">
-                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                <div class="lg:col-span-2 space-y-4">
+                    <!-- Status Legend -->
+                    <div class="flex flex-wrap gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase">Berjalan: <span id="count-berjalan">0</span></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase">Jatuh Tempo: <span id="count-tempo">0</span></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase">Lunas: <span id="count-lunas">0</span></span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden overflow-x-auto">
                         <table class="w-full text-left">
                             <thead class="bg-slate-50">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Tgl & Nama</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Status & Nama Anggota</th>
                                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Sisa Tagihan</th>
                                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Sisa Tenor</th>
                                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-center">Aksi</th>
@@ -189,80 +237,27 @@
         <!-- TAB 4: LAPORAN -->
         <div id="tab-laporan" class="tab-content hidden">
             <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
-                        <h3 class="text-2xl font-black text-slate-900">Laporan Keuangan & Performa</h3>
-                        <p class="text-slate-500 font-medium">Rekapitulasi data operasional koperasi</p>
+                        <h3 class="text-2xl font-black text-slate-900">Laporan Performa</h3>
+                        <p class="text-sm text-slate-500">Ringkasan aktivitas keuangan koperasi</p>
                     </div>
-                    <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100">
-                        <span class="text-blue-700 font-bold" id="report-date-now">Mei 2024</span>
-                    </div>
+                    <button onclick="updateReports()" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-blue-200 transition-all">
+                        <i class="fas fa-sync-alt"></i> Refresh Data
+                    </button>
+                </div>
+                
+                <div id="report-summary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Cards will be injected by JS -->
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-2 bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                        <h4 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
-                            <i class="fas fa-chart-line text-blue-600"></i> Analisis Arus Kas
-                        </h4>
-                        
-                        <div class="space-y-6">
-                            <div>
-                                <div class="flex justify-between mb-2">
-                                    <span class="text-sm font-bold text-slate-600 uppercase">Total Pemasukan (Debet)</span>
-                                    <span id="rep-masuk" class="text-sm font-black text-emerald-600">Rp 0</span>
-                                </div>
-                                <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
-                                    <div id="bar-masuk" class="bg-emerald-500 h-full transition-all duration-1000" style="width: 0%"></div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div class="flex justify-between mb-2">
-                                    <span class="text-sm font-bold text-slate-600 uppercase">Total Pengeluaran (Kredit)</span>
-                                    <span id="rep-keluar" class="text-sm font-black text-rose-600">Rp 0</span>
-                                </div>
-                                <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
-                                    <div id="bar-keluar" class="bg-rose-500 h-full transition-all duration-1000" style="width: 0%"></div>
-                                </div>
-                            </div>
-
-                            <div class="pt-6 border-t border-slate-200 grid grid-cols-2 gap-4">
-                                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Kas di Tangan</p>
-                                    <p id="rep-netto" class="text-lg font-black text-slate-800">Rp 0</p>
-                                </div>
-                                <div class="bg-blue-600 p-4 rounded-xl shadow-md shadow-blue-100">
-                                    <p class="text-[10px] font-bold text-blue-100 uppercase mb-1">Aset Piutang</p>
-                                    <p id="rep-piutang" class="text-lg font-black text-white">Rp 0</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl flex flex-col justify-between">
-                        <div>
-                            <h4 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
-                                <i class="fas fa-users text-blue-600"></i> Statistik Operasional
-                            </h4>
-                            <div class="space-y-4">
-                                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                                    <span class="text-sm font-medium text-slate-600">Total Anggota</span>
-                                    <span id="rep-anggota" class="text-lg font-black text-blue-700">0</span>
-                                </div>
-                                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                                    <span class="text-sm font-medium text-slate-600">Pinjaman Aktif</span>
-                                    <span id="rep-loan-count" class="text-lg font-black text-blue-700">0</span>
-                                </div>
-                                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                                    <span class="text-sm font-medium text-slate-600">Avg. Setoran Harian</span>
-                                    <span id="rep-avg-daily" class="text-lg font-black text-blue-700">Rp 0</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-8">
-                            <button onclick="exportToExcel()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all">
-                                <i class="fas fa-file-export"></i> Unduh Laporan Lengkap
-                            </button>
+                <div class="mt-12">
+                    <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-chart-pie text-blue-600"></i> Distribusi Kas
+                    </h4>
+                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                        <div id="kas-stats-detail" class="space-y-4">
+                             <!-- Detail will be injected here -->
                         </div>
                     </div>
                 </div>
@@ -275,10 +270,6 @@
         <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6">
             <h3 class="text-xl font-bold mb-1">Input Angsuran</h3>
             <p id="modal-loan-name" class="text-sm text-slate-500 mb-6 font-medium"></p>
-            <div class="bg-blue-50 p-4 rounded-xl mb-6 space-y-2">
-                <div class="flex justify-between"><span class="text-xs font-bold uppercase text-blue-600">Sisa Tagihan</span><span id="modal-loan-remaining" class="text-xs font-black text-blue-800"></span></div>
-                <div class="flex justify-between"><span class="text-xs font-bold uppercase text-blue-600">Target Harian</span><span id="modal-loan-target" class="text-xs font-black text-blue-800"></span></div>
-            </div>
             <input type="number" id="payment-input-amount" class="w-full px-4 py-3 rounded-xl border-2 border-blue-100 focus:border-blue-500 focus:outline-none text-lg font-bold mb-4 text-blue-700">
             <div class="flex gap-3">
                 <button onclick="closePaymentModal()" class="flex-1 px-4 py-3 bg-slate-100 rounded-xl font-bold">Batal</button>
@@ -287,69 +278,56 @@
         </div>
     </div>
 
-    <!-- Modal Histori -->
-    <div id="modal-history" class="fixed inset-0 bg-slate-900/50 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm no-print">
-        <div class="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+    <!-- Modal Histori Pembayaran -->
+    <div id="modal-history" class="fixed inset-0 bg-slate-900/50 z-[101] hidden items-center justify-center p-4 backdrop-blur-sm no-print">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6">
+            <div class="flex justify-between items-center mb-6">
                 <div>
                     <h3 class="text-xl font-bold">Histori Pembayaran</h3>
-                    <p id="history-loan-name" class="text-sm text-slate-500 font-medium"></p>
+                    <p id="history-loan-member" class="text-xs text-slate-500 font-bold uppercase"></p>
                 </div>
-                <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
+                <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-600 bg-slate-50 w-10 h-10 rounded-full flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="flex-1 overflow-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-100 sticky top-0">
-                        <tr>
-                            <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Waktu</th>
-                            <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-right">Nominal</th>
-                            <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-right">Sisa Tenor</th>
-                            <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="list-history" class="divide-y divide-slate-100"></tbody>
-                </table>
+            
+            <!-- Header Table Histori -->
+            <div class="grid grid-cols-5 gap-2 px-4 py-2 bg-slate-50 rounded-t-xl border border-slate-100 text-[10px] font-black text-slate-400 uppercase">
+                <div class="col-span-1">Tanggal</div>
+                <div class="col-span-1 text-right">Setoran</div>
+                <div class="col-span-1 text-right">Sisa Tagih</div>
+                <div class="col-span-1 text-right">Sisa Tenor</div>
+                <div class="col-span-1 text-center">Aksi</div>
             </div>
-        </div>
-    </div>
 
-    <div id="print-area" class="hidden p-12 bg-white text-black">
-        <div class="text-center mb-10 border-b-4 border-black pb-6">
-            <h1 class="text-3xl font-black uppercase text-center mb-2">Struk Pembayaran Angsuran</h1>
-            <p class="font-bold text-xl mt-1 text-center">Koperasi Abadi Lestari Mandiri</p>
-        </div>
-        <div class="grid grid-cols-2 gap-8 mb-10 text-lg">
-            <div><p class="text-sm uppercase text-gray-500">Nama Anggota</p><p id="print-name" class="font-bold border-b border-gray-200"></p></div>
-            <div class="text-right"><p class="text-sm uppercase text-gray-500">Waktu Transaksi</p><p id="print-date" class="font-bold border-b border-gray-200"></p></div>
-            <div><p class="text-sm uppercase text-gray-500">Jumlah Bayar</p><p id="print-amount" class="font-black text-2xl"></p></div>
-            <div class="text-right"><p class="text-sm uppercase text-gray-500">Sisa Tagihan</p><p id="print-remaining" class="font-black text-2xl text-red-600"></p></div>
-        </div>
-        <div class="bg-gray-100 p-6 rounded-xl text-center border-2 border-dashed border-gray-400">
-            <p class="text-lg italic font-medium">"Status sisa tenor Anda saat ini adalah <span id="print-tenor" class="font-black text-blue-700"></span> Hari."</p>
-            <p class="text-sm mt-4 uppercase font-bold text-gray-600">Simpan Bukti Ini Sebagai Tanda Terima Sah</p>
+            <div id="history-content" class="max-h-[400px] overflow-y-auto border-x border-b border-slate-100 rounded-b-xl divide-y divide-slate-50">
+                <!-- Histori list will be injected here -->
+            </div>
+            
+            <button onclick="closeHistoryModal()" class="w-full mt-6 bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-all">Selesai</button>
         </div>
     </div>
 
     <script>
-        // Inisialisasi DB dengan pengecekan aman agar data tidak tertimpa array kosong [] jika kuncinya salah
         let db = {
             kas: JSON.parse(localStorage.getItem('koperasi_kas')) || [],
             anggota: JSON.parse(localStorage.getItem('koperasi_members')) || [],
             pinjaman: JSON.parse(localStorage.getItem('koperasi_loans')) || []
         };
 
-        let activeLoanId = null;
         const formatIDR = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-tab', 'text-blue-600'));
-            document.getElementById('btn-' + tabId).classList.add('active-tab', 'text-blue-600');
+            const btn = document.getElementById('btn-' + tabId);
+            if(btn) btn.classList.add('active-tab', 'text-blue-600');
+            
+            if(tabId === 'tab-laporan') updateReports();
             initData();
         }
 
-        // Fungsi simpan data yang dipanggil setiap kali ada perubahan
         function saveData() {
             localStorage.setItem('koperasi_kas', JSON.stringify(db.kas));
             localStorage.setItem('koperasi_members', JSON.stringify(db.anggota));
@@ -357,244 +335,358 @@
             initData();
         }
 
-        // --- PINJAMAN ---
-        function updateLoanPreview() {
-            const p = parseFloat(document.getElementById('loan-amount').value) || 0;
-            const t = parseInt(document.getElementById('loan-term').value) || 1;
-            const i = parseFloat(document.getElementById('loan-interest').value) || 0;
-            const daily = (p + (p * (i/100))) / t;
-            document.getElementById('loan-preview').innerText = formatIDR(daily);
-            return daily;
+        function calculateLoan() {
+            const pokok = parseFloat(document.getElementById('loan-amount').value) || 0;
+            const tenor = parseInt(document.getElementById('loan-term').value) || 1;
+            const bungaPersen = parseFloat(document.getElementById('loan-interest').value) || 0;
+
+            const admin = pokok * 0.05;
+            const tabungan = pokok * 0.05;
+            const diterima = pokok - admin - tabungan;
+            
+            const totalTagihan = pokok + (pokok * (bungaPersen/100));
+            const angsuran = totalTagihan / tenor;
+
+            document.getElementById('preview-admin').innerText = formatIDR(admin);
+            document.getElementById('preview-tabungan').innerText = formatIDR(tabungan);
+            document.getElementById('preview-received').innerText = formatIDR(diterima);
+            document.getElementById('loan-preview').innerText = formatIDR(angsuran);
+
+            return { pokok, tenor, totalTagihan, angsuran, diterima, admin, tabungan };
         }
-        document.querySelectorAll('#loan-amount, #loan-term, #loan-interest').forEach(e => e.addEventListener('input', updateLoanPreview));
+
+        document.querySelectorAll('#loan-amount, #loan-term, #loan-interest').forEach(el => {
+            el.addEventListener('input', calculateLoan);
+        });
+
+        document.getElementById('form-kas').addEventListener('submit', (e) => {
+            e.preventDefault();
+            db.kas.push({
+                id: Date.now(),
+                desc: document.getElementById('kas-desc').value,
+                type: document.getElementById('kas-type').value,
+                amount: parseFloat(document.getElementById('kas-amount').value),
+                date: new Date().toISOString()
+            });
+            saveData();
+            e.target.reset();
+        });
+
+        document.getElementById('form-anggota').addEventListener('submit', (e) => {
+            e.preventDefault();
+            db.anggota.push({
+                id: 'MEM-' + Date.now(),
+                name: document.getElementById('member-name').value,
+                phone: document.getElementById('member-phone').value,
+                address: document.getElementById('member-address').value
+            });
+            saveData();
+            e.target.reset();
+            alert('Anggota berhasil didaftarkan!');
+        });
 
         document.getElementById('form-pinjaman').addEventListener('submit', (e) => {
             e.preventDefault();
-            const mId = document.getElementById('loan-member').value;
-            if(!mId) return alert('Pilih Anggota!');
-            const member = db.anggota.find(m => m.id === mId);
-            const p = parseInt(document.getElementById('loan-amount').value);
-            const daily = updateLoanPreview();
-            const term = parseInt(document.getElementById('loan-term').value);
-            const total = daily * term;
-            
+            const memberId = document.getElementById('loan-member').value;
+            if(!memberId) return alert('Pilih Anggota dulu!');
+
+            const member = db.anggota.find(m => m.id === memberId);
+            const data = calculateLoan();
+
             db.pinjaman.push({
                 id: 'LOAN-' + Date.now(),
-                memberId: mId,
+                memberId: member.id,
                 memberName: member.name,
-                memberPhone: member.phone,
-                totalInitial: total,
-                totalRemaining: total,
-                dailyPayment: daily,
-                termInitial: term,
-                termRemaining: term,
+                pokok: data.pokok,
+                totalInitial: data.totalTagihan,
+                totalRemaining: data.totalTagihan,
+                dailyPayment: data.angsuran,
+                termInitial: data.tenor,
+                termRemaining: data.tenor,
                 startDate: new Date().toISOString(),
                 history: []
             });
-            db.kas.push({ id: Date.now(), desc: `Pencairan: ${member.name}`, type: 'kredit', amount: p, date: new Date().toISOString() });
-            saveData(); e.target.reset();
+
+            db.kas.push({
+                id: Date.now(),
+                desc: `Pencairan: ${member.name} (Netto)`,
+                type: 'kredit',
+                amount: data.diterima,
+                date: new Date().toISOString()
+            });
+
+            db.kas.push({ id: Date.now()+1, desc: `Admin Pinjaman: ${member.name}`, type: 'debet', amount: data.admin, date: new Date().toISOString(), category: 'admin' });
+            db.kas.push({ id: Date.now()+2, desc: `Tabungan Anggota: ${member.name}`, type: 'debet', amount: data.tabungan, date: new Date().toISOString(), category: 'tabungan' });
+
+            saveData();
+            e.target.reset();
+            alert('Pinjaman berhasil dicairkan!');
         });
 
-        // --- PEMBAYARAN ---
-        function openPaymentModal(lId) {
-            const loan = db.pinjaman.find(l => l.id === lId);
-            if (loan.totalRemaining <= 0) return alert('Pinjaman ini sudah lunas!');
-            activeLoanId = lId;
-            document.getElementById('modal-loan-name').innerText = loan.memberName;
-            document.getElementById('modal-loan-remaining').innerText = formatIDR(loan.totalRemaining);
-            document.getElementById('modal-loan-target').innerText = formatIDR(loan.dailyPayment);
-            document.getElementById('payment-input-amount').value = Math.round(loan.dailyPayment);
+        function getLoanStatus(l) {
+            if (l.totalRemaining <= 0) return { label: 'Lunas', color: 'bg-emerald-500', text: 'text-emerald-500' };
+            if (l.termRemaining <= 0) return { label: 'Jatuh Tempo', color: 'bg-rose-500', text: 'text-rose-500' };
+            return { label: 'Berjalan', color: 'bg-blue-500', text: 'text-blue-500' };
+        }
+
+        function initData() {
+            document.getElementById('header-date').innerText = new Date().toLocaleDateString('id-ID', { dateStyle: 'full' });
+            
+            // Render Members Table
+            const listAnggota = document.getElementById('list-anggota');
+            if(listAnggota) {
+                listAnggota.innerHTML = db.anggota.map(m => `
+                    <tr>
+                        <td class="px-6 py-4 font-bold text-slate-800">${m.name}</td>
+                        <td class="px-6 py-4 text-sm text-blue-600 font-medium">${m.phone}</td>
+                        <td class="px-6 py-4 text-sm text-slate-500">${m.address}</td>
+                        <td class="px-6 py-4 text-center">
+                            <button onclick="deleteMember('${m.id}')" class="text-slate-300 hover:text-rose-500 transition-colors">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                if(db.anggota.length === 0) listAnggota.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Belum ada anggota terdaftar</td></tr>';
+            }
+
+            // Render Members Select
+            const select = document.getElementById('loan-member');
+            if(select) {
+                select.innerHTML = '<option value="">Pilih Anggota</option>' + 
+                db.anggota.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+            }
+
+            // Render Kas
+            document.getElementById('list-kas').innerHTML = db.kas.slice(-15).reverse().map(t => `
+                <tr>
+                    <td class="px-6 py-4 text-xs font-medium text-slate-500">${new Date(t.date).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 font-semibold text-sm">${t.desc}</td>
+                    <td class="px-6 py-4 text-right font-black ${t.type === 'debet' ? 'text-emerald-600' : 'text-rose-600'}">${formatIDR(t.amount)}</td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="deleteKas(${t.id})" class="text-slate-300 hover:text-rose-500 transition-colors">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Pinjaman Stats
+            let cLunas = 0, cTempo = 0, cJalan = 0;
+
+            // Render Pinjaman
+            document.getElementById('list-pinjaman').innerHTML = db.pinjaman.map(l => {
+                const status = getLoanStatus(l);
+                if (status.label === 'Lunas') cLunas++;
+                else if (status.label === 'Jatuh Tempo') cTempo++;
+                else cJalan++;
+
+                return `
+                    <tr class="${l.totalRemaining <= 0 ? 'bg-slate-50/50' : ''}">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="px-2 py-0.5 rounded-full ${status.color} text-[8px] font-black text-white uppercase tracking-tighter">${status.label}</span>
+                                <div class="font-bold text-slate-900">${l.memberName}</div>
+                            </div>
+                            <div class="text-[10px] text-slate-400 font-medium">${new Date(l.startDate).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'})}</div>
+                            <div class="mt-1 text-[10px] text-blue-600 font-bold uppercase">Harian: ${formatIDR(l.dailyPayment)}</div>
+                        </td>
+                        <td class="px-6 py-4 text-right font-black ${l.totalRemaining <= 0 ? 'text-emerald-600' : 'text-rose-600'}">
+                            ${formatIDR(l.totalRemaining)}
+                        </td>
+                        <td class="px-6 py-4 text-right font-bold ${l.termRemaining <= 0 && l.totalRemaining > 0 ? 'text-rose-600' : 'text-slate-700'}">
+                            ${Math.max(0, Math.ceil(l.termRemaining))} Hari
+                        </td>
+                        <td class="px-6 py-4 text-center space-x-2">
+                            <button onclick="viewHistory('${l.id}')" title="Lihat Histori" class="bg-slate-100 text-slate-600 p-2 rounded-lg hover:bg-slate-200 transition-colors">
+                                <i class="fas fa-history"></i>
+                            </button>
+                            ${l.totalRemaining > 0 ? `<button onclick="openPaymentModal('${l.id}')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700">BAYAR</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Update Counts
+            document.getElementById('count-berjalan').innerText = cJalan;
+            document.getElementById('count-tempo').innerText = cTempo;
+            document.getElementById('count-lunas').innerText = cLunas;
+
+            // Update Statistics Home
+            const totalMasuk = db.kas.filter(t => t.type === 'debet').reduce((a,b) => a + b.amount, 0);
+            const totalKeluar = db.kas.filter(t => t.type === 'kredit').reduce((a,b) => a + b.amount, 0);
+            const piutang = db.pinjaman.reduce((a, b) => a + b.totalRemaining, 0);
+            
+            // FITUR BARU: Menghitung total kumulatif POKOK pinjaman (bukan tagihan total + bunga)
+            const totalPokokPinjaman = db.pinjaman.reduce((a, b) => a + (b.pokok || 0), 0);
+
+            const totalTabungan = db.kas.filter(t => t.category === 'tabungan').reduce((a,b) => a + b.amount, 0);
+            const totalAdmin = db.kas.filter(t => t.category === 'admin').reduce((a,b) => a + b.amount, 0);
+
+            document.getElementById('kas-saldo').innerText = formatIDR(piutang);
+            document.getElementById('kas-total-pinjaman').innerText = formatIDR(totalPokokPinjaman);
+            document.getElementById('kas-masuk').innerText = formatIDR(totalMasuk);
+            document.getElementById('kas-keluar').innerText = formatIDR(totalKeluar);
+            document.getElementById('stat-tabungan').innerText = formatIDR(totalTabungan);
+            document.getElementById('stat-admin').innerText = formatIDR(totalAdmin);
+        }
+
+        // --- LAPORAN LOGIC ---
+        function updateReports() {
+            const piutangAktif = db.pinjaman.reduce((a, b) => a + (b.totalRemaining || 0), 0);
+            const totalPinjamanPokok = db.pinjaman.reduce((a, b) => a + (b.pokok || 0), 0);
+            const totalPinjamanLunas = db.pinjaman.filter(l => l.totalRemaining <= 0).length;
+            const totalAnggota = db.anggota.length;
+
+            const totalAdmin = db.kas.filter(t => t.category === 'admin').reduce((a,b) => a + b.amount, 0);
+            const totalTabungan = db.kas.filter(t => t.category === 'tabungan').reduce((a,b) => a + b.amount, 0);
+            
+            const totalBungaPotential = db.pinjaman.reduce((a, b) => a + (b.totalInitial - b.pokok), 0);
+            
+            const container = document.getElementById('report-summary');
+            const detailContainer = document.getElementById('kas-stats-detail');
+
+            const reportData = [
+                { label: 'Piutang Aktif', value: formatIDR(piutangAktif), color: 'text-blue-600', bg: 'bg-blue-50', icon: 'fa-hand-holding-dollar' },
+                { label: 'Total Pokok Terpancar', value: formatIDR(totalPinjamanPokok), color: 'text-indigo-600', bg: 'bg-indigo-50', icon: 'fa-money-bill-trend-up' },
+                { label: 'Profit (Admin)', value: formatIDR(totalAdmin), color: 'text-amber-600', bg: 'bg-amber-50', icon: 'fa-chart-line' },
+                { label: 'Total Tabungan', value: formatIDR(totalTabungan), color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'fa-piggy-bank' }
+            ];
+
+            container.innerHTML = reportData.map(d => `
+                <div class="${d.bg} p-6 rounded-2xl border border-white shadow-sm transition-transform hover:scale-[1.02]">
+                    <div class="w-10 h-10 ${d.color} mb-4 flex items-center justify-center rounded-full bg-white shadow-sm">
+                        <i class="fas ${d.icon}"></i>
+                    </div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">${d.label}</p>
+                    <h3 class="text-xl font-black ${d.color}">${d.value}</h3>
+                </div>
+            `).join('');
+
+            detailContainer.innerHTML = `
+                <div class="flex justify-between items-center py-2 border-b border-slate-200/50">
+                    <span class="text-sm font-medium text-slate-600">Total Anggota Terdaftar</span>
+                    <span class="text-sm font-bold text-slate-900">${totalAnggota} Jiwa</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-200/50">
+                    <span class="text-sm font-medium text-slate-600">Pinjaman Lunas</span>
+                    <span class="text-sm font-bold text-emerald-600">${totalPinjamanLunas} Berkas</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-200/50">
+                    <span class="text-sm font-medium text-slate-600">Potensi Bunga Pinjaman</span>
+                    <span class="text-sm font-bold text-slate-900">${formatIDR(totalBungaPotential)}</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-slate-200/50">
+                    <span class="text-sm font-medium text-slate-600">Rata-rata Tagihan Harian</span>
+                    <span class="text-sm font-bold text-blue-600">${formatIDR(db.pinjaman.filter(l => l.totalRemaining > 0).reduce((a,b) => a + b.dailyPayment, 0))}</span>
+                </div>
+            `;
+        }
+
+        // PAYMENT MODAL
+        let activeLoanId = null;
+        function openPaymentModal(id) {
+            activeLoanId = id;
+            const l = db.pinjaman.find(x => x.id === id);
+            document.getElementById('modal-loan-name').innerText = l.memberName;
+            document.getElementById('payment-input-amount').value = Math.round(l.dailyPayment);
             document.getElementById('modal-payment').classList.add('modal-active');
         }
         function closePaymentModal() { document.getElementById('modal-payment').classList.remove('modal-active'); }
 
         function processPayment() {
-            const amt = parseInt(document.getElementById('payment-input-amount').value);
+            const amt = parseFloat(document.getElementById('payment-input-amount').value);
             const loan = db.pinjaman.find(l => l.id === activeLoanId);
-            if(!amt || amt > loan.totalRemaining + 10) return alert('Nominal Salah!'); 
             
-            const daysCovered = amt / loan.dailyPayment;
-            loan.totalRemaining = Math.max(0, loan.totalRemaining - amt);
-            loan.termRemaining = Math.max(0, loan.termRemaining - daysCovered);
+            loan.totalRemaining -= amt;
+            loan.termRemaining -= (amt / loan.dailyPayment);
             
-            loan.history.unshift({ id: Date.now(), date: new Date().toISOString(), amount: amt, termRemaining: Math.ceil(loan.termRemaining), totalRemaining: loan.totalRemaining });
-            db.kas.push({ id: Date.now(), desc: `Setoran: ${loan.memberName}`, type: 'debet', amount: amt, date: new Date().toISOString() });
-            
-            saveData(); closePaymentModal();
+            if(!loan.history) loan.history = [];
+            loan.history.push({
+                date: new Date().toISOString(),
+                amount: amt,
+                remainingBalance: Math.max(0, loan.totalRemaining),
+                remainingTerm: Math.max(0, Math.ceil(loan.termRemaining))
+            });
+
+            db.kas.push({
+                id: Date.now(),
+                desc: `Setoran Harian: ${loan.memberName}`,
+                type: 'debet',
+                amount: amt,
+                date: new Date().toISOString()
+            });
+
+            saveData();
+            closePaymentModal();
         }
 
-        // --- REPORT LOGIC ---
-        function updateReport() {
-            const today = new Date();
-            document.getElementById('report-date-now').innerText = today.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+        // HISTORY & WHATSAPP
+        function viewHistory(id) {
+            const loan = db.pinjaman.find(l => l.id === id);
+            const historyList = loan.history || [];
+            const content = document.getElementById('history-content');
+            document.getElementById('history-loan-member').innerText = loan.memberName;
             
-            const totalMasuk = db.kas.filter(t => t.type === 'debet').reduce((a,b) => a + b.amount, 0);
-            const totalKeluar = db.kas.filter(t => t.type === 'kredit').reduce((a,b) => a + b.amount, 0);
-            const totalPiutang = db.pinjaman.reduce((a, b) => a + b.totalRemaining, 0);
-            const netto = totalMasuk - totalKeluar;
-            
-            const maxVal = Math.max(totalMasuk, totalKeluar, 1);
-            document.getElementById('bar-masuk').style.width = (totalMasuk / maxVal * 100) + '%';
-            document.getElementById('bar-keluar').style.width = (totalKeluar / maxVal * 100) + '%';
-            
-            document.getElementById('rep-masuk').innerText = formatIDR(totalMasuk);
-            document.getElementById('rep-keluar').innerText = formatIDR(totalKeluar);
-            document.getElementById('rep-netto').innerText = formatIDR(netto);
-            document.getElementById('rep-piutang').innerText = formatIDR(totalPiutang);
-            
-            document.getElementById('rep-anggota').innerText = db.anggota.length;
-            document.getElementById('rep-loan-count').innerText = db.pinjaman.filter(l => l.totalRemaining > 0).length;
-            const activeLoans = db.pinjaman.filter(l => l.totalRemaining > 0);
-            const avgDaily = activeLoans.length > 0 ? (activeLoans.reduce((a,b) => a + b.dailyPayment, 0) / activeLoans.length) : 0;
-            document.getElementById('rep-avg-daily').innerText = formatIDR(avgDaily);
-        }
-
-        // --- UI RENDERERS ---
-        function initData() {
-            document.getElementById('header-date').innerText = new Date().toLocaleDateString('id-ID', { dateStyle: 'full' });
-            
-            // Render Kas Table
-            document.getElementById('list-kas').innerHTML = db.kas.slice(-10).reverse().map(t => `
-                <tr class="hover:bg-slate-50">
-                    <td class="px-6 py-4 text-xs font-medium text-slate-500">${new Date(t.date).toLocaleDateString()}</td>
-                    <td class="px-6 py-4 font-semibold text-sm">${t.desc}</td>
-                    <td class="px-6 py-4 text-right font-black ${t.type === 'debet' ? 'text-emerald-600' : 'text-rose-600'}">${formatIDR(t.amount)}</td>
-                    <td class="px-6 py-4 text-center"><button onclick="deleteKas(${t.id})" class="text-slate-300 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button></td>
-                </tr>
-            `).join('');
-
-            // Top Summary Boxes
-            const tp = db.pinjaman.reduce((a, b) => a + b.totalRemaining, 0);
-            document.getElementById('kas-saldo').innerText = formatIDR(tp);
-            document.getElementById('kas-masuk').innerText = formatIDR(db.kas.filter(t => t.type === 'debet').reduce((a,b) => a + b.amount, 0));
-            document.getElementById('kas-keluar').innerText = formatIDR(db.kas.filter(t => t.type === 'kredit').reduce((a,b) => a + b.amount, 0));
-
-            // Loan List
-            document.getElementById('list-pinjaman').innerHTML = db.pinjaman.map(l => {
-                let statusBadge = '';
-                let statusClass = '';
-                
-                if (l.totalRemaining <= 0) {
-                    statusBadge = 'Lunas';
-                    statusClass = 'bg-emerald-100 text-emerald-700';
-                } else if (l.termRemaining <= 0) {
-                    statusBadge = 'Jatuh Tempo';
-                    statusClass = 'bg-rose-100 text-rose-700';
-                } else {
-                    statusBadge = 'Berjalan';
-                    statusClass = 'bg-blue-100 text-blue-700';
-                }
-
-                const loanDate = new Date(l.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-
-                return `
-                <tr class="${l.totalRemaining <= 0 ? 'opacity-60 grayscale' : ''}">
-                    <td class="px-6 py-4">
-                        <div class="text-[10px] text-blue-600 font-black mb-0.5">${loanDate}</div>
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="font-bold text-slate-900">${l.memberName}</span>
-                            <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase ${statusClass}">${statusBadge}</span>
+            if(historyList.length === 0) {
+                content.innerHTML = '<p class="text-center text-slate-400 py-10 text-sm">Belum ada catatan setoran.</p>';
+            } else {
+                content.innerHTML = historyList.slice().reverse().map((h, idx) => `
+                    <div class="grid grid-cols-5 gap-2 px-4 py-4 items-center hover:bg-slate-50 transition-colors">
+                        <div class="col-span-1">
+                            <p class="text-[10px] font-bold text-slate-800">${new Date(h.date).toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'})}</p>
+                            <p class="text-[9px] text-slate-400">${new Date(h.date).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</p>
                         </div>
-                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">TAGIHAN: ${formatIDR(l.dailyPayment)}/HARI</div>
-                    </td>
-                    <td class="px-6 py-4 text-right font-black ${l.totalRemaining <= 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatIDR(l.totalRemaining)}</td>
-                    <td class="px-6 py-4 text-right font-bold text-slate-700">${Math.ceil(l.termRemaining)} Hari</td>
-                    <td class="px-6 py-4 text-center space-x-2">
-                        ${l.totalRemaining > 0 ? `<button onclick="openPaymentModal('${l.id}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition-all">BAYAR</button>` : ''}
-                        <button onclick="openHistoryModal('${l.id}')" class="bg-slate-100 text-slate-600 px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-200">HISTORI</button>
-                        <button onclick="deleteLoan('${l.id}')" class="text-slate-300 hover:text-rose-500 transition-all ml-2"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                </tr>
-            `}).join('');
-
-            // Member List
-            document.getElementById('list-anggota').innerHTML = db.anggota.map(m => `
-                <tr>
-                    <td class="px-6 py-4 font-bold text-blue-700">${m.name}</td>
-                    <td class="px-6 py-4 text-sm font-medium">${m.phone}</td>
-                    <td class="px-6 py-4 text-sm text-slate-500">${m.address}</td>
-                    <td class="px-6 py-4 text-center"><button onclick="deleteMember('${m.id}')" class="text-rose-400 hover:text-rose-600"><i class="fas fa-trash"></i></button></td>
-                </tr>
-            `).join('');
-            document.getElementById('loan-member').innerHTML = '<option value="">Pilih Anggota</option>' + db.anggota.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
-
-            updateReport();
-        }
-
-        // --- SHARING & PRINT ---
-        function shareWA(lId, hId) {
-            const l = db.pinjaman.find(x => x.id === lId);
-            const h = l.history.find(x => x.id === hId);
-            const msg = `*BUKTI ANGSURAN KOPERASI*%0A---------------------------%0A*Nama:* ${l.memberName}%0A*Bayar:* ${formatIDR(h.amount)}%0A*Sisa:* ${formatIDR(h.totalRemaining)}%0A*Sisa Tenor:* ${h.termRemaining} Hari%0A---------------------------%0A_Terima Kasih Atas Pembayarannya._`;
-            window.open(`https://wa.me/${l.memberPhone}?text=${msg}`, '_blank');
-        }
-        function downloadPDF(lId, hId) {
-            const l = db.pinjaman.find(x => x.id === lId);
-            const h = l.history.find(x => x.id === hId);
-            document.getElementById('print-name').innerText = l.memberName;
-            document.getElementById('print-date').innerText = new Date(h.date).toLocaleString('id-ID');
-            document.getElementById('print-amount').innerText = formatIDR(h.amount);
-            document.getElementById('print-remaining').innerText = formatIDR(h.totalRemaining);
-            document.getElementById('print-tenor').innerText = h.termRemaining;
-            window.print();
-        }
-        function openHistoryModal(lId) {
-            const l = db.pinjaman.find(x => x.id === lId);
-            document.getElementById('history-loan-name').innerText = l.memberName;
-            document.getElementById('list-history').innerHTML = l.history.length > 0 ? l.history.map(h => `
-                <tr>
-                    <td class="px-6 py-4 text-xs font-medium">${new Date(h.date).toLocaleString('id-ID')}</td>
-                    <td class="px-6 py-4 text-right font-black text-emerald-600">${formatIDR(h.amount)}</td>
-                    <td class="px-6 py-4 text-right font-bold">${h.termRemaining} Hari</td>
-                    <td class="px-6 py-4 text-center space-x-2">
-                        <button onclick="shareWA('${l.id}', ${h.id})" class="text-emerald-500 bg-emerald-50 p-2 rounded-lg hover:bg-emerald-100"><i class="fab fa-whatsapp"></i></button>
-                        <button onclick="downloadPDF('${l.id}', ${h.id})" class="text-blue-500 bg-blue-50 p-2 rounded-lg hover:bg-blue-100"><i class="fas fa-file-pdf"></i></button>
-                    </td>
-                </tr>
-            `).join('') : '<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Belum ada riwayat pembayaran</td></tr>';
+                        <div class="col-span-1 text-right text-[10px] font-black text-emerald-600">${formatIDR(h.amount)}</div>
+                        <div class="col-span-1 text-right text-[10px] font-bold text-rose-500">${formatIDR(h.remainingBalance || 0)}</div>
+                        <div class="col-span-1 text-right text-[10px] font-medium text-slate-600">${h.remainingTerm || 0} Hr</div>
+                        <div class="col-span-1 text-center">
+                            <button onclick="shareToWhatsApp('${loan.id}', '${h.date}')" class="bg-emerald-100 text-emerald-700 w-8 h-8 rounded-full hover:bg-emerald-200 transition-all">
+                                <i class="fab fa-whatsapp text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
             document.getElementById('modal-history').classList.add('modal-active');
         }
-        function closeHistoryModal() { document.getElementById('modal-history').classList.remove('modal-active'); }
 
-        // --- HELPERS ---
-        function deleteKas(id) { if(confirm('Hapus transaksi ini?')) { db.kas = db.kas.filter(t => t.id !== id); saveData(); } }
-        function deleteMember(id) { if(confirm('Hapus anggota? Semua data terkait mungkin akan terpengaruh.')) { db.anggota = db.anggota.filter(m => m.id !== id); saveData(); } }
-        function deleteLoan(id) { if(confirm('Hapus data pinjaman ini? Tindakan ini tidak dapat dibatalkan.')) { db.pinjaman = db.pinjaman.filter(l => l.id !== id); saveData(); } }
-        
-        document.getElementById('form-anggota').addEventListener('submit', (e) => {
-            e.preventDefault();
-            db.anggota.push({ 
-                id: 'MEM-' + Date.now(), 
-                name: document.getElementById('member-name').value, 
-                phone: document.getElementById('member-phone').value, 
-                address: document.getElementById('member-address').value 
-            });
-            saveData(); 
-            e.target.reset();
-        });
+        function shareToWhatsApp(loanId, historyDate) {
+            const loan = db.pinjaman.find(l => l.id === loanId);
+            const member = db.anggota.find(m => m.id === loan.memberId);
+            const history = loan.history.find(h => h.date === historyDate);
+            
+            const dateStr = new Date(history.date).toLocaleDateString('id-ID', { dateStyle: 'full' });
+            const timeStr = new Date(history.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-        document.getElementById('form-kas').addEventListener('submit', (e) => {
-            e.preventDefault();
-            db.kas.push({ 
-                id: Date.now(), 
-                desc: document.getElementById('kas-desc').value, 
-                type: document.getElementById('kas-type').value, 
-                amount: parseInt(document.getElementById('kas-amount').value), 
-                date: new Date().toISOString() 
-            });
-            saveData(); 
-            e.target.reset();
-        });
+            const message = `*KWITANSI DIGITAL SETORAN HARIAN*%0A` +
+                            `*Koperasi Abadi Lestari Mandiri*%0A` +
+                            `------------------------------------------%0A` +
+                            `Nama: *${loan.memberName}*%0A` +
+                            `Tanggal: ${dateStr}%0A` +
+                            `Jam: ${timeStr}%0A%0A` +
+                            `*RINCIAN TRANSAKSI*%0A` +
+                            `Setoran: *${formatIDR(history.amount)}*%0A` +
+                            `Sisa Tagihan: *${formatIDR(history.remainingBalance)}*%0A` +
+                            `Sisa Tenor: *${history.remainingTerm} Hari*%0A` +
+                            `------------------------------------------%0A` +
+                            `_Terima kasih telah melakukan pembayaran tepat waktu. Simpan pesan ini sebagai bukti setoran yang sah._`;
 
-        function exportToExcel() {
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(db.kas), "Data_Kas");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(db.pinjaman), "Data_Pinjaman");
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(db.anggota), "Data_Anggota");
-            XLSX.writeFile(wb, "Laporan_Koperasi_Lengkap.xlsx");
+            const phone = member ? member.phone : '';
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
         }
 
-        // Jalankan render data saat pertama kali dimuat
+        function closeHistoryModal() { document.getElementById('modal-history').classList.remove('modal-active'); }
+        function deleteKas(id) { if(confirm('Hapus transaksi?')) { db.kas = db.kas.filter(t => t.id !== id); saveData(); } }
+        function deleteMember(id) { if(confirm('Hapus anggota ini?')) { db.anggota = db.anggota.filter(m => m.id !== id); saveData(); } }
+
+        function exportToExcel() {
+            const worksheet = XLSX.utils.json_to_sheet(db.kas);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Buku Kas");
+            XLSX.writeFile(workbook, `Laporan_Koperasi_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+
         window.onload = initData;
     </script>
 </body>
