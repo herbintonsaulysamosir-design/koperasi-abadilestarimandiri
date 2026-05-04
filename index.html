@@ -201,20 +201,37 @@
                     </div>
                 </div>
                 <div class="lg:col-span-2 space-y-4">
-                    <!-- Status Legend -->
-                    <div class="flex flex-wrap gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-blue-500"></span>
-                            <span class="text-[10px] font-bold text-slate-500 uppercase">Berjalan: <span id="count-berjalan">0</span></span>
+                    <!-- Status Legend / Summary Boxes -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-rose-500">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pinjaman Macet</p>
+                            <div class="flex justify-between items-end mt-1">
+                                <h4 id="stat-macet-count" class="text-lg font-black text-slate-800">0 Jiwa</h4>
+                                <span id="stat-macet-amount" class="text-xs font-bold text-rose-600">Rp 0</span>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
-                            <span class="text-[10px] font-bold text-slate-500 uppercase">Jatuh Tempo: <span id="count-tempo">0</span></span>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pinjaman Lancar</p>
+                            <div class="flex justify-between items-end mt-1">
+                                <h4 id="stat-lancar-count" class="text-lg font-black text-slate-800">0 Jiwa</h4>
+                                <span id="stat-lancar-amount" class="text-xs font-bold text-emerald-600">Lunas</span>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-                            <span class="text-[10px] font-bold text-slate-500 uppercase">Lunas: <span id="count-lunas">0</span></span>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sedang Berjalan</p>
+                            <div class="flex justify-between items-end mt-1">
+                                <h4 id="stat-berjalan-count" class="text-lg font-black text-slate-800">0 Jiwa</h4>
+                                <span id="stat-berjalan-amount" class="text-xs font-bold text-blue-600">Rp 0</span>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- PENCARIAN -->
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-slate-400"></i>
+                        </div>
+                        <input type="text" id="search-pinjaman" onkeyup="initData()" placeholder="Cari nama anggota atau ketik 'Macet', 'Lancar', 'Berjalan'..." class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 focus:outline-none transition-all shadow-sm">
                     </div>
 
                     <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden overflow-x-auto">
@@ -424,8 +441,8 @@
         });
 
         function getLoanStatus(l) {
-            if (l.totalRemaining <= 0) return { label: 'Lunas', color: 'bg-emerald-500', text: 'text-emerald-500' };
-            if (l.termRemaining <= 0) return { label: 'Jatuh Tempo', color: 'bg-rose-500', text: 'text-rose-500' };
+            if (l.totalRemaining <= 0) return { label: 'Lancar', color: 'bg-emerald-500', text: 'text-emerald-500' };
+            if (l.termRemaining <= 0) return { label: 'Macet', color: 'bg-rose-500', text: 'text-rose-500' };
             return { label: 'Berjalan', color: 'bg-blue-500', text: 'text-blue-500' };
         }
 
@@ -471,15 +488,34 @@
                 </tr>
             `).join('');
 
-            // Pinjaman Stats
-            let cLunas = 0, cTempo = 0, cJalan = 0;
+            // PENCARIAN LOGIC
+            const searchQuery = (document.getElementById('search-pinjaman')?.value || "").toLowerCase();
 
-            // Render Pinjaman
-            document.getElementById('list-pinjaman').innerHTML = db.pinjaman.map(l => {
+            // Pinjaman Stats for Summary Boxes
+            let sMacetC = 0, sMacetA = 0;
+            let sLancarC = 0;
+            let sJalanC = 0, sJalanA = 0;
+
+            // Render Pinjaman Table with Filter
+            document.getElementById('list-pinjaman').innerHTML = db.pinjaman
+            .filter(l => {
                 const status = getLoanStatus(l);
-                if (status.label === 'Lunas') cLunas++;
-                else if (status.label === 'Jatuh Tempo') cTempo++;
-                else cJalan++;
+                const nameMatch = l.memberName.toLowerCase().includes(searchQuery);
+                const statusMatch = status.label.toLowerCase().includes(searchQuery);
+                return nameMatch || statusMatch;
+            })
+            .map(l => {
+                const status = getLoanStatus(l);
+                
+                if (status.label === 'Lancar') {
+                    sLancarC++;
+                } else if (status.label === 'Macet') {
+                    sMacetC++;
+                    sMacetA += l.totalRemaining;
+                } else {
+                    sJalanC++;
+                    sJalanA += l.totalRemaining;
+                }
 
                 return `
                     <tr class="${l.totalRemaining <= 0 ? 'bg-slate-50/50' : ''}">
@@ -502,24 +538,28 @@
                                 <i class="fas fa-history"></i>
                             </button>
                             ${l.totalRemaining > 0 ? `<button onclick="openPaymentModal('${l.id}')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700">BAYAR</button>` : ''}
+                            <button onclick="deleteLoan('${l.id}')" title="Hapus Pinjaman" class="text-slate-300 hover:text-rose-500 p-2 transition-colors">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
                         </td>
                     </tr>
                 `;
             }).join('');
 
-            // Update Counts
-            document.getElementById('count-berjalan').innerText = cJalan;
-            document.getElementById('count-tempo').innerText = cTempo;
-            document.getElementById('count-lunas').innerText = cLunas;
+            // Update Summary Boxes Labels
+            document.getElementById('stat-macet-count').innerText = `${db.pinjaman.filter(l => getLoanStatus(l).label === 'Macet').length} Jiwa`;
+            document.getElementById('stat-macet-amount').innerText = formatIDR(db.pinjaman.filter(l => getLoanStatus(l).label === 'Macet').reduce((a,b) => a + b.totalRemaining, 0));
+            
+            document.getElementById('stat-lancar-count').innerText = `${db.pinjaman.filter(l => getLoanStatus(l).label === 'Lancar').length} Jiwa`;
+            
+            document.getElementById('stat-berjalan-count').innerText = `${db.pinjaman.filter(l => getLoanStatus(l).label === 'Berjalan').length} Jiwa`;
+            document.getElementById('stat-berjalan-amount').innerText = formatIDR(db.pinjaman.filter(l => getLoanStatus(l).label === 'Berjalan').reduce((a,b) => a + b.totalRemaining, 0));
 
             // Update Statistics Home
             const totalMasuk = db.kas.filter(t => t.type === 'debet').reduce((a,b) => a + b.amount, 0);
             const totalKeluar = db.kas.filter(t => t.type === 'kredit').reduce((a,b) => a + b.amount, 0);
             const piutang = db.pinjaman.reduce((a, b) => a + b.totalRemaining, 0);
-            
-            // FITUR BARU: Menghitung total kumulatif POKOK pinjaman (bukan tagihan total + bunga)
             const totalPokokPinjaman = db.pinjaman.reduce((a, b) => a + (b.pokok || 0), 0);
-
             const totalTabungan = db.kas.filter(t => t.category === 'tabungan').reduce((a,b) => a + b.amount, 0);
             const totalAdmin = db.kas.filter(t => t.category === 'admin').reduce((a,b) => a + b.amount, 0);
 
@@ -679,6 +719,14 @@
         function closeHistoryModal() { document.getElementById('modal-history').classList.remove('modal-active'); }
         function deleteKas(id) { if(confirm('Hapus transaksi?')) { db.kas = db.kas.filter(t => t.id !== id); saveData(); } }
         function deleteMember(id) { if(confirm('Hapus anggota ini?')) { db.anggota = db.anggota.filter(m => m.id !== id); saveData(); } }
+        
+        // Hapus Pinjaman
+        function deleteLoan(id) {
+            if(confirm('Apakah Anda yakin ingin menghapus data pinjaman ini? Tindakan ini tidak dapat dibatalkan.')) {
+                db.pinjaman = db.pinjaman.filter(l => l.id !== id);
+                saveData();
+            }
+        }
 
         function exportToExcel() {
             const worksheet = XLSX.utils.json_to_sheet(db.kas);
