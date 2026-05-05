@@ -3,21 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Koperasi Digital Pro</title>
+    <title>Sistem Koperasi Digital Pro + Kasbon & Titipan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .active-tab { border-bottom: 3px solid #1d4ed8; color: #1d4ed8; }
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
         .modal-active { display: flex !important; }
         
+        .ai-glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.4); }
+            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.7); }
+            100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.4); }
+        }
+
+        .menu-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.08);
+        }
+
         @media print {
             body * { visibility: hidden; }
             #print-area, #print-area * { visibility: visible; }
@@ -31,89 +41,161 @@
     <!-- Navbar -->
     <nav class="bg-white border-b border-slate-200 sticky top-0 z-50 no-print">
         <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-lg overflow-hidden border border-slate-100 shadow-sm">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('tab-dashboard')">
+                <div class="w-10 h-10 rounded-lg overflow-hidden border border-slate-100 shadow-sm">
                     <img src="https://i.ibb.co.com/gYkrygc/Whats-App-Image-2026-05-03-at-13-54-32.jpg" alt="Logo" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=KALM&background=1d4ed8&color=fff'">
                 </div>
                 <div>
-                    <h1 class="text-lg font-bold leading-tight">Koperasi Abadi Lestari Mandiri</h1>
-                    <p class="text-xs text-slate-500 font-medium" id="header-date"></p>
+                    <h1 class="text-md font-bold leading-tight">Koperasi Abadi Lestari Mandiri</h1>
+                    <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wider" id="header-date"></p>
                 </div>
             </div>
             <div class="flex gap-2">
-                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all">
-                    <i class="fas fa-file-excel"></i> <span class="hidden md:inline">Ekspor Excel</span>
+                <button onclick="openAIChat()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ai-glow">
+                    <i class="fas fa-sparkles text-[10px]"></i> ✨ Tanya AI
                 </button>
             </div>
         </div>
-        
-        <div class="max-w-7xl mx-auto px-4 flex gap-8 overflow-x-auto">
-            <button onclick="switchTab('tab-kas')" id="btn-tab-kas" class="py-3 text-sm font-bold active-tab transition-all whitespace-nowrap">Buku Kas</button>
-            <button onclick="switchTab('tab-anggota')" id="btn-tab-anggota" class="py-3 text-sm font-bold text-slate-500 hover:text-blue-600 transition-all whitespace-nowrap">Anggota</button>
-            <button onclick="switchTab('tab-pinjaman')" id="btn-tab-pinjaman" class="py-3 text-sm font-bold text-slate-500 hover:text-blue-600 transition-all whitespace-nowrap">Pinjaman Harian</button>
-            <button onclick="switchTab('tab-laporan')" id="btn-tab-laporan" class="py-3 text-sm font-bold text-slate-500 hover:text-blue-600 transition-all whitespace-nowrap">Laporan</button>
-        </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 py-8 no-print">
+    <main class="max-w-7xl mx-auto px-4 py-6 no-print">
         
-        <!-- TAB 1: BUKU KAS -->
-        <div id="tab-kas" class="tab-content">
-            <!-- Row Atas Statistik -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-blue-600">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Piutang Aktif</p>
-                    <h2 id="kas-saldo" class="text-xl font-black text-blue-700">Rp 0</h2>
-                </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-600">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Pinjaman Pokok</p>
-                    <h2 id="kas-total-pinjaman" class="text-xl font-black text-indigo-700">Rp 0</h2>
-                </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-1">Total Pemasukan</p>
-                    <h2 id="kas-masuk" class="text-xl font-black text-emerald-600">Rp 0</h2>
-                </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <p class="text-xs font-bold text-rose-500 uppercase tracking-wider mb-1">Total Pengeluaran</p>
-                    <h2 id="kas-keluar" class="text-xl font-black text-rose-600">Rp 0</h2>
-                </div>
+        <!-- TAB 0: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-content">
+            <div class="mb-6">
+                <h2 class="text-xl font-black text-slate-900">Dashboard</h2>
+                <p class="text-xs text-slate-500">Ringkasan operasional harian Anda.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="bg-slate-100/50 p-4 rounded-xl border border-dashed border-slate-300">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Tabungan Terkumpul</p>
-                    <h3 id="stat-tabungan" class="text-lg font-bold text-blue-600">Rp 0</h3>
+            <!-- Menu Grid -->
+            <div class="grid grid-cols-4 md:grid-cols-8 gap-3 mb-8">
+                <button onclick="switchTab('tab-kas')" class="menu-card bg-white p-3 rounded-2xl border border-slate-200 flex flex-col items-center gap-2 transition-all">
+                    <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 text-sm"><i class="fas fa-book-bookmark"></i></div>
+                    <span class="font-bold text-[10px] text-slate-700 text-center leading-tight">Buku Kas</span>
+                </button>
+                <button onclick="switchTab('tab-anggota')" class="menu-card bg-white p-3 rounded-2xl border border-slate-200 flex flex-col items-center gap-2 transition-all">
+                    <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 text-sm"><i class="fas fa-users"></i></div>
+                    <span class="font-bold text-[10px] text-slate-700 text-center leading-tight">Anggota</span>
+                </button>
+                <button onclick="switchTab('tab-pinjaman')" class="menu-card bg-white p-3 rounded-2xl border border-slate-200 flex flex-col items-center gap-2 transition-all">
+                    <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 text-sm"><i class="fas fa-hand-holding-dollar"></i></div>
+                    <span class="font-bold text-[10px] text-slate-700 text-center leading-tight">Pinjaman</span>
+                </button>
+                <button onclick="switchTab('tab-storting')" class="menu-card bg-white p-3 rounded-2xl border border-slate-200 flex flex-col items-center gap-2 transition-all">
+                    <div class="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 text-sm"><i class="fas fa-calendar-check"></i></div>
+                    <span class="font-bold text-[10px] text-slate-700 text-center leading-tight">Storting</span>
+                </button>
+                <button onclick="switchTab('tab-kasbon')" class="menu-card bg-white p-3 rounded-2xl border border-slate-200 flex flex-col items-center gap-2 transition-all">
+                    <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-orange-600 text-sm"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <span class="font-bold text-[10px] text-slate-700 text-center leading-tight">Kasbon</span>
+                </button>
+                <button onclick="switchTab('tab-titipan')" class="menu-card bg-white p-3 rounded-2xl border border-slate-200 flex flex-col items-center gap-2 transition-all">
+                    <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 text-sm"><i class="fas fa-vault"></i></div>
+                    <span class="font-bold text-[10px] text-slate-700 text-center leading-tight">Titipan</span>
+                </button>
+                <button onclick="switchTab('tab-tunai')" class="menu-card bg-white p-3 rounded-2xl border border-slate-200 flex flex-col items-center gap-2 transition-all">
+                    <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 text-sm"><i class="fas fa-money-bill-transfer"></i></div>
+                    <span class="font-bold text-[10px] text-slate-700 text-center leading-tight">Tunai</span>
+                </button>
+                <button onclick="switchTab('tab-laporan')" class="menu-card bg-white p-3 rounded-2xl border border-slate-200 flex flex-col items-center gap-2 transition-all">
+                    <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-700 text-sm"><i class="fas fa-chart-pie"></i></div>
+                    <span class="font-bold text-[10px] text-slate-700 text-center leading-tight">Laporan</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Dropan Section -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm uppercase">
+                            <i class="fas fa-hand-holding-dollar text-amber-500"></i> Dropan (Bulan Ini)
+                        </h3>
+                        <span id="dropan-month" class="text-[10px] bg-slate-100 px-2 py-1 rounded-full font-bold text-slate-500 uppercase tracking-widest">MEI 2024</span>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-100">
+                            <p class="text-[9px] font-bold text-amber-500 uppercase mb-1">Jumlah Pinjaman (Pokok)</p>
+                            <h2 id="dash-dropan-pokok" class="text-lg font-black text-amber-700 tracking-tight">Rp 0</h2>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Jumlah Pencairan (Diterima)</p>
+                            <h2 id="dash-dropan-nominal" class="text-lg font-black text-slate-800 tracking-tight">Rp 0</h2>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-blue-50 border border-blue-100">
+                            <p class="text-[9px] font-bold text-blue-400 uppercase mb-1">Jumlah Global (Pokok + Bunga)</p>
+                            <h2 id="dash-dropan-global" class="text-lg font-black text-blue-700 tracking-tight">Rp 0</h2>
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-slate-100/50 p-4 rounded-xl border border-dashed border-slate-300">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Biaya Admin</p>
-                    <h3 id="stat-admin" class="text-lg font-bold text-amber-600">Rp 0</h3>
+
+                <!-- Summary Sections -->
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="bg-blue-600 p-6 rounded-3xl text-white shadow-xl shadow-blue-200">
+                        <p class="text-blue-100 text-[10px] font-bold uppercase tracking-wider mb-1">Total Piutang Aktif</p>
+                        <h2 id="dash-piutang" class="text-2xl font-black">Rp 0</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white p-6 rounded-3xl border border-slate-200">
+                            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Kasbon Berjalan</p>
+                            <h2 id="dash-kasbon" class="text-xl font-black text-orange-600">Rp 0</h2>
+                        </div>
+                        <div class="bg-white p-6 rounded-3xl border border-slate-200">
+                            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Titipan Masuk</p>
+                            <h2 id="dash-titipan" class="text-xl font-black text-purple-600">Rp 0</h2>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200">
+                        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Kas di Tangan (Tunai)</p>
+                        <h2 id="dash-tunai" class="text-2xl font-black text-slate-800">Rp 0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: BUKU KAS -->
+        <div id="tab-kas" class="tab-content hidden">
+            <button onclick="switchTab('tab-dashboard')" class="mb-6 flex items-center gap-2 text-slate-500 font-bold hover:text-blue-600">
+                <i class="fas fa-arrow-left text-xs"></i> Kembali
+            </button>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Piutang</p>
+                    <h2 id="kas-saldo" class="text-lg font-black text-blue-700">Rp 0</h2>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+                    <p class="text-[10px] font-bold text-emerald-500 uppercase mb-1">Total Masuk</p>
+                    <h2 id="kas-masuk" class="text-lg font-black text-emerald-600">Rp 0</h2>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+                    <p class="text-[10px] font-bold text-rose-500 uppercase mb-1">Total Keluar</p>
+                    <h2 id="kas-keluar" class="text-lg font-black text-rose-600">Rp 0</h2>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-1">
                     <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
-                        <h3 class="font-bold mb-4 flex items-center gap-2">Catat Transaksi Manual</h3>
+                        <h3 class="font-bold mb-4 text-sm uppercase text-slate-400">Input Transaksi Kas Umum</h3>
                         <form id="form-kas" class="space-y-4">
-                            <input type="text" id="kas-desc" required placeholder="Keterangan" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none">
-                            <select id="kas-type" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none">
-                                <option value="debet">Uang Masuk (Debet)</option>
-                                <option value="kredit">Uang Keluar (Kredit)</option>
+                            <input type="text" id="kas-desc" required placeholder="Keterangan" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none text-sm">
+                            <select id="kas-type" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none text-sm">
+                                <option value="debet">Masuk (Debet)</option>
+                                <option value="kredit">Keluar (Kredit)</option>
                             </select>
-                            <input type="number" id="kas-amount" required placeholder="Nominal (Rp)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none">
-                            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all">Simpan Transaksi</button>
+                            <input type="number" id="kas-amount" required placeholder="Nominal (Rp)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none text-sm font-bold">
+                            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all text-sm">Simpan</button>
                         </form>
                     </div>
                 </div>
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden overflow-x-auto">
+                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
                         <table class="w-full text-left">
                             <thead class="bg-slate-50">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Tanggal</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Keterangan</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Nominal</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-center">Aksi</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Tanggal</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Ket</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-right">Nominal</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="list-kas" class="divide-y divide-slate-100"></tbody>
@@ -125,27 +207,29 @@
 
         <!-- TAB 2: ANGGOTA -->
         <div id="tab-anggota" class="tab-content hidden">
+            <button onclick="switchTab('tab-dashboard')" class="mb-6 flex items-center gap-2 text-slate-500 font-bold hover:text-blue-600">
+                <i class="fas fa-arrow-left text-xs"></i> Kembali
+            </button>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-1">
                     <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
-                        <h3 class="font-bold mb-4">Tambah Anggota Baru</h3>
+                        <h3 class="font-bold mb-4 text-sm uppercase text-slate-400">Tambah Anggota</h3>
                         <form id="form-anggota" class="space-y-4">
-                            <input type="text" id="member-name" required placeholder="Nama Lengkap" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none">
-                            <input type="text" id="member-phone" required placeholder="No. Telepon (Awali 62)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none">
-                            <input type="text" id="member-address" required placeholder="Alamat" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none">
-                            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-all">Daftarkan Anggota</button>
+                            <input type="text" id="member-name" required placeholder="Nama Lengkap" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none text-sm">
+                            <input type="text" id="member-phone" required placeholder="Telepon" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none text-sm">
+                            <input type="text" id="member-address" required placeholder="Alamat" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none text-sm">
+                            <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold text-sm">Simpan Anggota</button>
                         </form>
                     </div>
                 </div>
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden overflow-x-auto">
+                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
                         <table class="w-full text-left">
                             <thead class="bg-slate-50">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Nama</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Kontak</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Alamat</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-center">Aksi</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Nama</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Alamat</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="list-anggota" class="divide-y divide-slate-100"></tbody>
@@ -157,91 +241,65 @@
 
         <!-- TAB 3: PINJAMAN -->
         <div id="tab-pinjaman" class="tab-content hidden">
+            <button onclick="switchTab('tab-dashboard')" class="mb-6 flex items-center gap-2 text-slate-500 font-bold hover:text-blue-600">
+                <i class="fas fa-arrow-left text-xs"></i> Kembali
+            </button>
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div class="lg:col-span-1">
                     <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
-                        <h3 class="font-bold mb-4">Pengajuan Pinjaman</h3>
+                        <h3 class="font-bold mb-4 text-sm uppercase text-amber-700">Input Pinjaman Baru</h3>
                         <form id="form-pinjaman" class="space-y-4">
-                            <select id="loan-member" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none">
+                            <select id="loan-member" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none text-sm" required>
                                 <option value="">Pilih Anggota</option>
                             </select>
-                            <input type="number" id="loan-amount" required placeholder="Pokok Pinjaman" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Tanggal Pinjaman</label>
+                                <input type="date" id="loan-date" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none bg-slate-50 text-sm">
+                            </div>
+                            <input type="number" id="loan-amount" oninput="updateLoanSimulation()" required placeholder="Pokok Pinjaman" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none text-md font-bold">
+                            
+                            <div class="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300 space-y-2">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Simulasi Real-time</p>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-slate-500">Admin (5%):</span>
+                                    <span id="sim-admin" class="font-bold text-rose-600">Rp 0</span>
+                                </div>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-slate-500">Tabungan (5%):</span>
+                                    <span id="sim-tabungan" class="font-bold text-blue-600">Rp 0</span>
+                                </div>
+                                <div class="flex justify-between text-[11px] border-t border-slate-200 pt-2">
+                                    <span class="text-slate-700 font-bold">Diterima (Pencairan):</span>
+                                    <span id="sim-keterima" class="font-black text-emerald-600">Rp 0</span>
+                                </div>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-slate-500">Angsuran / Hari:</span>
+                                    <span id="sim-angsuran" class="font-bold text-amber-600">Rp 0</span>
+                                </div>
+                            </div>
+
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-1">
-                                    <label class="text-[10px] font-bold text-slate-400">TENOR (HARI)</label>
-                                    <input type="number" id="loan-term" required value="30" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase">Tenor (Hari)</label>
+                                    <input type="number" id="loan-term" oninput="updateLoanSimulation()" required value="24" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm">
                                 </div>
                                 <div class="space-y-1">
-                                    <label class="text-[10px] font-bold text-slate-400">BUNGA (%)</label>
-                                    <input type="number" id="loan-interest" required value="20" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase">Bunga (%)</label>
+                                    <input type="number" id="loan-interest" oninput="updateLoanSimulation()" required value="20" class="w-full px-4 py-2 rounded-xl border border-slate-200 text-sm">
                                 </div>
                             </div>
-
-                            <div class="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-200">
-                                <div class="flex justify-between items-center text-[11px] font-bold">
-                                    <span class="text-slate-500 uppercase">Admin (5%)</span>
-                                    <span id="preview-admin" class="text-amber-600">Rp 0</span>
-                                </div>
-                                <div class="flex justify-between items-center text-[11px] font-bold border-b border-slate-200 pb-2">
-                                    <span class="text-slate-500 uppercase">Tabungan (5%)</span>
-                                    <span id="preview-tabungan" class="text-blue-600">Rp 0</span>
-                                </div>
-                                <div class="flex justify-between items-center pt-1 font-black text-sm">
-                                    <span class="text-slate-700">Uang Diterima</span>
-                                    <span id="preview-received" class="text-emerald-600">Rp 0</span>
-                                </div>
-                            </div>
-
-                            <div class="bg-blue-600 p-4 rounded-xl shadow-inner">
-                                <p class="text-xs text-blue-100 font-bold uppercase mb-1">Angsuran Harian</p>
-                                <p id="loan-preview" class="text-xl font-black text-white">Rp 0</p>
-                            </div>
-                            <button type="submit" class="w-full bg-blue-700 text-white py-3 rounded-xl font-bold hover:bg-blue-800 transition-all shadow-lg shadow-blue-100">Proses Pencairan</button>
+                            <button type="submit" class="w-full bg-amber-600 text-white py-3 rounded-xl font-bold text-sm">Proses Pinjaman</button>
                         </form>
                     </div>
                 </div>
-                <div class="lg:col-span-2 space-y-4">
-                    <!-- Status Legend / Summary Boxes -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-rose-500">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pinjaman Macet</p>
-                            <div class="flex justify-between items-end mt-1">
-                                <h4 id="stat-macet-count" class="text-lg font-black text-slate-800">0 Jiwa</h4>
-                                <span id="stat-macet-amount" class="text-xs font-bold text-rose-600">Rp 0</span>
-                            </div>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pinjaman Lancar</p>
-                            <div class="flex justify-between items-end mt-1">
-                                <h4 id="stat-lancar-count" class="text-lg font-black text-slate-800">0 Jiwa</h4>
-                                <span id="stat-lancar-amount" class="text-xs font-bold text-emerald-600">Lunas</span>
-                            </div>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-blue-500">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sedang Berjalan</p>
-                            <div class="flex justify-between items-end mt-1">
-                                <h4 id="stat-berjalan-count" class="text-lg font-black text-slate-800">0 Jiwa</h4>
-                                <span id="stat-berjalan-amount" class="text-xs font-bold text-blue-600">Rp 0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- PENCARIAN -->
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-slate-400"></i>
-                        </div>
-                        <input type="text" id="search-pinjaman" onkeyup="initData()" placeholder="Cari nama anggota atau ketik 'Macet', 'Lancar', 'Berjalan'..." class="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-100 focus:border-blue-400 focus:outline-none transition-all shadow-sm">
-                    </div>
-
-                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden overflow-x-auto">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
                         <table class="w-full text-left">
                             <thead class="bg-slate-50">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Status & Nama Anggota</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Sisa Tagihan</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Sisa Tenor</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-center">Aksi</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Peminjam</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-right">Sisa Tagih</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="list-pinjaman" class="divide-y divide-slate-100"></tbody>
@@ -251,77 +309,234 @@
             </div>
         </div>
 
-        <!-- TAB 4: LAPORAN -->
-        <div id="tab-laporan" class="tab-content hidden">
-            <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <!-- TAB 4: STORTING -->
+        <div id="tab-storting" class="tab-content hidden">
+            <button onclick="switchTab('tab-dashboard')" class="mb-6 flex items-center gap-2 text-slate-500 font-bold hover:text-blue-600">
+                <i class="fas fa-arrow-left text-xs"></i> Kembali
+            </button>
+
+            <!-- Summary Storting -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
-                        <h3 class="text-2xl font-black text-slate-900">Laporan Performa</h3>
-                        <p class="text-sm text-slate-500">Ringkasan aktivitas keuangan koperasi</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1" id="storting-today-label">Storting Hari Ini</p>
+                        <h3 id="storting-today-total" class="text-xl font-black text-emerald-600">Rp 0</h3>
                     </div>
-                    <button onclick="updateReports()" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-blue-200 transition-all">
-                        <i class="fas fa-sync-alt"></i> Refresh Data
-                    </button>
+                    <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600"><i class="fas fa-coins"></i></div>
                 </div>
-                
-                <div id="report-summary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Cards will be injected by JS -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Storting Bulan Ini</p>
+                        <h3 id="storting-month-total" class="text-xl font-black text-blue-600">Rp 0</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600"><i class="fas fa-receipt"></i></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h3 class="font-bold flex items-center gap-2 text-rose-600 text-sm uppercase">
+                        <i class="fas fa-calendar-check"></i> Daftar Tagihan (Storting)
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <label class="text-[10px] font-bold text-slate-400">PILIH TANGGAL:</label>
+                        <input type="date" id="filter-storting-date" onchange="initData()" class="bg-slate-50 px-4 py-2 rounded-xl font-bold text-xs focus:outline-none border border-slate-200">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left min-w-[800px]">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Nama Anggota</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-right">Tagihan Harian</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-right">Setor Tgl Terpilih</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-storting" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 7: KASBON -->
+        <div id="tab-kasbon" class="tab-content hidden">
+            <button onclick="switchTab('tab-dashboard')" class="mb-6 flex items-center gap-2 text-slate-500 font-bold hover:text-blue-600">
+                <i class="fas fa-arrow-left text-xs"></i> Kembali
+            </button>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+                        <h3 class="font-bold mb-4 text-sm uppercase text-orange-600">Input Kasbon</h3>
+                        <form id="form-kasbon" class="space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Tanggal Kasbon</label>
+                                <input type="date" id="kb-date" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-slate-50">
+                            </div>
+                            <input type="text" id="kb-name" required placeholder="Nama Penerima" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
+                            <input type="number" id="kb-amount" required placeholder="Nominal Kasbon" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold">
+                            <button type="submit" class="w-full bg-orange-600 text-white py-3 rounded-xl font-bold text-sm">Simpan Kasbon</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Tanggal</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Penerima</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-right">Nominal</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="list-kasbon" class="divide-y divide-slate-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 8: TITIPAN -->
+        <div id="tab-titipan" class="tab-content hidden">
+            <button onclick="switchTab('tab-dashboard')" class="mb-6 flex items-center gap-2 text-slate-500 font-bold hover:text-blue-600">
+                <i class="fas fa-arrow-left text-xs"></i> Kembali
+            </button>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
+                        <h3 class="font-bold mb-4 text-sm uppercase text-purple-600">Input Titipan</h3>
+                        <form id="form-titipan" class="space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase">Tanggal Titipan</label>
+                                <input type="date" id="tp-date" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-slate-50">
+                            </div>
+                            <input type="text" id="tp-name" required placeholder="Sumber Titipan" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
+                            <input type="number" id="tp-amount" required placeholder="Nominal Titipan" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold">
+                            <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-xl font-bold text-sm">Simpan Titipan</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Tanggal</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Sumber</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-right">Nominal</th>
+                                    <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="list-titipan" class="divide-y divide-slate-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: TUNAI -->
+        <div id="tab-tunai" class="tab-content hidden">
+            <button onclick="switchTab('tab-dashboard')" class="mb-6 flex items-center gap-2 text-slate-500 font-bold hover:text-blue-600">
+                <i class="fas fa-arrow-left text-xs"></i> Kembali
+            </button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Saldo Tunai Global -->
+                <div class="bg-white p-8 rounded-3xl shadow-md border border-slate-200">
+                    <h3 class="text-lg font-bold text-indigo-600 uppercase mb-6">Arus Kas di Tangan (Global)</h3>
+                    <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Total Saldo Tunai Akumulasi</p>
+                        <h2 id="tunai-total" class="text-3xl font-black text-indigo-600">Rp 0</h2>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-4 italic">*Hasil dari seluruh pemasukan dikurangi seluruh pengeluaran.</p>
                 </div>
 
-                <div class="mt-12">
-                    <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-chart-pie text-blue-600"></i> Distribusi Kas
-                    </h4>
-                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
-                        <div id="kas-stats-detail" class="space-y-4">
-                             <!-- Detail will be injected here -->
+                <!-- Perhitungan Hari Ini -->
+                <div class="bg-white p-8 rounded-3xl shadow-md border border-slate-200">
+                    <h3 class="text-lg font-bold text-slate-800 uppercase mb-6">Kalkulasi Tunai Hari Ini</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="text-xs font-semibold text-slate-500">Storting Hari Ini (+)</span>
+                            <span id="tunai-today-storting" class="text-sm font-black text-emerald-600">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="text-xs font-semibold text-slate-500">Kasbon Hari Ini (+)</span>
+                            <span id="tunai-today-kasbon" class="text-sm font-black text-emerald-600">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="text-xs font-semibold text-slate-500">Pencairan Hari Ini (-)</span>
+                            <span id="tunai-today-pencairan" class="text-sm font-black text-rose-600">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <span class="text-xs font-semibold text-slate-500">Titipan Hari Ini (-)</span>
+                            <span id="tunai-today-titipan" class="text-sm font-black text-rose-600">Rp 0</span>
+                        </div>
+                        <div class="pt-4 border-t border-slate-200">
+                            <div class="bg-slate-900 p-4 rounded-2xl text-white">
+                                <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Hasil Perhitungan Harian</p>
+                                <h2 id="tunai-today-result" class="text-2xl font-black">Rp 0</h2>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- TAB 6: LAPORAN -->
+        <div id="tab-laporan" class="tab-content hidden">
+            <button onclick="switchTab('tab-dashboard')" class="mb-6 flex items-center gap-2 text-slate-500 font-bold hover:text-blue-600">
+                <i class="fas fa-arrow-left text-xs"></i> Kembali
+            </button>
+            <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200">
+                <h3 class="text-xl font-black mb-8 uppercase tracking-widest text-slate-400">Laporan Global</h3>
+                <div id="report-summary" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 text-sm"></div>
+                <button onclick="exportToExcel()" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 text-sm">
+                    <i class="fas fa-file-excel"></i> Download Excel
+                </button>
+            </div>
+        </div>
     </main>
 
-    <!-- Modal Pembayaran -->
+    <!-- MODALS -->
     <div id="modal-payment" class="fixed inset-0 bg-slate-900/50 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm no-print">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6">
-            <h3 class="text-xl font-bold mb-1">Input Angsuran</h3>
-            <p id="modal-loan-name" class="text-sm text-slate-500 mb-6 font-medium"></p>
-            <input type="number" id="payment-input-amount" class="w-full px-4 py-3 rounded-xl border-2 border-blue-100 focus:border-blue-500 focus:outline-none text-lg font-bold mb-4 text-blue-700">
+        <div class="bg-white w-full max-md rounded-2xl shadow-2xl p-6">
+            <h3 class="text-lg font-bold mb-1">Input Storting</h3>
+            <p id="modal-loan-name" class="text-xs text-slate-500 mb-6 font-medium uppercase tracking-wider"></p>
+            <div class="bg-slate-50 p-4 rounded-xl mb-4 border border-slate-100">
+                <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Nominal Setoran</p>
+                <input type="number" id="payment-input-amount" class="w-full bg-transparent text-xl font-black text-blue-700 focus:outline-none">
+            </div>
             <div class="flex gap-3">
-                <button onclick="closePaymentModal()" class="flex-1 px-4 py-3 bg-slate-100 rounded-xl font-bold">Batal</button>
-                <button onclick="processPayment()" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold">Konfirmasi</button>
+                <button onclick="closePaymentModal()" class="flex-1 px-4 py-3 bg-slate-100 rounded-xl font-bold text-slate-600 text-sm">Batal</button>
+                <button onclick="processPayment()" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm">Simpan Bayar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Histori Pembayaran -->
-    <div id="modal-history" class="fixed inset-0 bg-slate-900/50 z-[101] hidden items-center justify-center p-4 backdrop-blur-sm no-print">
-        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6">
-            <div class="flex justify-between items-center mb-6">
+    <div id="modal-history" class="fixed inset-0 bg-slate-900/50 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm no-print">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
                 <div>
-                    <h3 class="text-xl font-bold">Histori Pembayaran</h3>
-                    <p id="history-loan-member" class="text-xs text-slate-500 font-bold uppercase"></p>
+                    <h3 class="text-lg font-bold">Histori Setoran</h3>
+                    <p id="history-loan-name" class="text-[10px] text-slate-400 font-bold uppercase"></p>
                 </div>
-                <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-600 bg-slate-50 w-10 h-10 rounded-full flex items-center justify-center">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
             </div>
-            
-            <!-- Header Table Histori -->
-            <div class="grid grid-cols-5 gap-2 px-4 py-2 bg-slate-50 rounded-t-xl border border-slate-100 text-[10px] font-black text-slate-400 uppercase">
-                <div class="col-span-1">Tanggal</div>
-                <div class="col-span-1 text-right">Setoran</div>
-                <div class="col-span-1 text-right">Sisa Tagih</div>
-                <div class="col-span-1 text-right">Sisa Tenor</div>
-                <div class="col-span-1 text-center">Aksi</div>
+            <div class="max-h-[400px] overflow-y-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 sticky top-0">
+                        <tr>
+                            <th class="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase">Tanggal</th>
+                            <th class="px-6 py-3 text-[9px] font-bold text-slate-400 uppercase text-right">Nominal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-list-body" class="divide-y divide-slate-100"></tbody>
+                </table>
             </div>
-
-            <div id="history-content" class="max-h-[400px] overflow-y-auto border-x border-b border-slate-100 rounded-b-xl divide-y divide-slate-50">
-                <!-- Histori list will be injected here -->
+            <div class="p-6 bg-slate-50 text-right">
+                <p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Total Sudah Terbayar</p>
+                <h4 id="history-total-paid" class="text-xl font-black text-emerald-600 tracking-tight">Rp 0</h4>
             </div>
-            
-            <button onclick="closeHistoryModal()" class="w-full mt-6 bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-all">Selesai</button>
         </div>
     </div>
 
@@ -329,19 +544,17 @@
         let db = {
             kas: JSON.parse(localStorage.getItem('koperasi_kas')) || [],
             anggota: JSON.parse(localStorage.getItem('koperasi_members')) || [],
-            pinjaman: JSON.parse(localStorage.getItem('koperasi_loans')) || []
+            pinjaman: JSON.parse(localStorage.getItem('koperasi_loans')) || [],
+            kasbon: JSON.parse(localStorage.getItem('koperasi_kasbon')) || [],
+            titipan: JSON.parse(localStorage.getItem('koperasi_titipan')) || []
         };
 
         const formatIDR = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+        const getTodayStr = () => new Date().toISOString().split('T')[0];
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-tab', 'text-blue-600'));
-            const btn = document.getElementById('btn-' + tabId);
-            if(btn) btn.classList.add('active-tab', 'text-blue-600');
-            
-            if(tabId === 'tab-laporan') updateReports();
             initData();
         }
 
@@ -349,393 +562,231 @@
             localStorage.setItem('koperasi_kas', JSON.stringify(db.kas));
             localStorage.setItem('koperasi_members', JSON.stringify(db.anggota));
             localStorage.setItem('koperasi_loans', JSON.stringify(db.pinjaman));
+            localStorage.setItem('koperasi_kasbon', JSON.stringify(db.kasbon));
+            localStorage.setItem('koperasi_titipan', JSON.stringify(db.titipan));
             initData();
         }
 
-        function calculateLoan() {
-            const pokok = parseFloat(document.getElementById('loan-amount').value) || 0;
-            const tenor = parseInt(document.getElementById('loan-term').value) || 1;
-            const bungaPersen = parseFloat(document.getElementById('loan-interest').value) || 0;
-
-            const admin = pokok * 0.05;
-            const tabungan = pokok * 0.05;
-            const diterima = pokok - admin - tabungan;
+        function initData() {
+            const now = new Date();
+            const realTodayStr = getTodayStr(); 
+            const filterDateVal = document.getElementById('filter-storting-date').value || realTodayStr;
             
-            const totalTagihan = pokok + (pokok * (bungaPersen/100));
-            const angsuran = totalTagihan / tenor;
+            const isViewingToday = (filterDateVal === realTodayStr);
+            document.getElementById('storting-today-label').innerText = isViewingToday ? "Storting Hari Ini" : `Storting Tgl ${new Date(filterDateVal).toLocaleDateString('id-ID')}`;
 
-            document.getElementById('preview-admin').innerText = formatIDR(admin);
-            document.getElementById('preview-tabungan').innerText = formatIDR(tabungan);
-            document.getElementById('preview-received').innerText = formatIDR(diterima);
-            document.getElementById('loan-preview').innerText = formatIDR(angsuran);
+            document.getElementById('header-date').innerText = now.toLocaleDateString('id-ID', { dateStyle: 'full' });
+            if(document.getElementById('dropan-month')) {
+                document.getElementById('dropan-month').innerText = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase();
+            }
 
-            return { pokok, tenor, totalTagihan, angsuran, diterima, admin, tabungan };
+            const totalMasuk = db.kas.filter(t => t.type === 'debet').reduce((a,b) => a + b.amount, 0);
+            const totalKeluar = db.kas.filter(t => t.type === 'kredit').reduce((a,b) => a + b.amount, 0);
+            const piutang = db.pinjaman.reduce((a, b) => a + b.totalRemaining, 0);
+            const totalKasbon = db.kasbon.reduce((a, b) => a + b.amount, 0);
+            const totalTitipan = db.titipan.reduce((a, b) => a + b.amount, 0);
+            const tunai = totalMasuk - totalKeluar;
+
+            const stortingFiltered = db.kas
+                .filter(t => t.type === 'debet' && t.desc.includes('Storting') && t.date.split('T')[0] === filterDateVal)
+                .reduce((a, b) => a + b.amount, 0);
+
+            const stortingMonthTotal = db.kas
+                .filter(t => {
+                    const tDate = new Date(t.date);
+                    return t.type === 'debet' && 
+                           t.desc.includes('Storting') && 
+                           tDate.getMonth() === now.getMonth() && 
+                           tDate.getFullYear() === now.getFullYear();
+                })
+                .reduce((a, b) => a + b.amount, 0);
+
+            document.getElementById('storting-today-total').innerText = formatIDR(stortingFiltered);
+            document.getElementById('storting-month-total').innerText = formatIDR(stortingMonthTotal);
+
+            // LOGIKA TUNAI HARIAN: OTOMATIS RESET 24:00 (Hanya hitung transaksi hari ini)
+            const t_storting = db.kas.filter(t => t.date.startsWith(realTodayStr) && t.desc.includes('Storting')).reduce((a,b) => a+b.amount, 0);
+            
+            // FILTER HARIAN UNTUK KASBON & TITIPAN (Mendengarkan input tanggal atau default hari ini)
+            const t_kasbon = db.kasbon.filter(k => k.date.startsWith(realTodayStr)).reduce((a,b) => a+b.amount, 0);
+            const t_titipan = db.titipan.filter(tp => tp.date.startsWith(realTodayStr)).reduce((a,b) => a+b.amount, 0);
+            
+            const t_pencairan = db.kas.filter(t => t.date.startsWith(realTodayStr) && t.desc.includes('Cair:')).reduce((a,b) => a+b.amount, 0);
+            const t_result = (t_storting + t_kasbon) - (t_pencairan + t_titipan);
+
+            if(document.getElementById('tunai-today-storting')) document.getElementById('tunai-today-storting').innerText = formatIDR(t_storting);
+            if(document.getElementById('tunai-today-kasbon')) document.getElementById('tunai-today-kasbon').innerText = formatIDR(t_kasbon);
+            if(document.getElementById('tunai-today-pencairan')) document.getElementById('tunai-today-pencairan').innerText = formatIDR(t_pencairan);
+            if(document.getElementById('tunai-today-titipan')) document.getElementById('tunai-today-titipan').innerText = formatIDR(t_titipan);
+            if(document.getElementById('tunai-today-result')) document.getElementById('tunai-today-result').innerText = formatIDR(t_result);
+
+            document.getElementById('dash-piutang').innerText = formatIDR(piutang);
+            document.getElementById('dash-tunai').innerText = formatIDR(tunai);
+            document.getElementById('dash-kasbon').innerText = formatIDR(totalKasbon);
+            document.getElementById('dash-titipan').innerText = formatIDR(totalTitipan);
+            document.getElementById('tunai-total').innerText = formatIDR(tunai);
+            document.getElementById('kas-saldo').innerText = formatIDR(piutang);
+            document.getElementById('kas-masuk').innerText = formatIDR(totalMasuk);
+            document.getElementById('kas-keluar').innerText = formatIDR(totalKeluar);
+
+            renderTables(filterDateVal);
         }
 
-        document.querySelectorAll('#loan-amount, #loan-term, #loan-interest').forEach(el => {
-            el.addEventListener('input', calculateLoan);
-        });
+        function renderTables(filterDate) {
+            const listKas = document.getElementById('list-kas');
+            if(listKas) {
+                const sortedKas = [...db.kas].sort((a, b) => new Date(b.date) - new Date(a.date));
+                listKas.innerHTML = sortedKas.slice(0, 15).map(t => `
+                    <tr>
+                        <td class="px-6 py-4 text-[10px] text-slate-400">${new Date(t.date).toLocaleDateString('id-ID')}</td>
+                        <td class="px-6 py-4 text-xs font-semibold text-slate-700">${t.desc}</td>
+                        <td class="px-6 py-4 text-right text-sm font-black ${t.type === 'debet' ? 'text-emerald-600' : 'text-rose-600'}">${formatIDR(t.amount)}</td>
+                        <td class="px-6 py-4 text-center"><button onclick="deleteKas(${t.id})" class="text-slate-300 hover:text-rose-500"><i class="fas fa-trash-alt text-[10px]"></i></button></td>
+                    </tr>`).join('');
+            }
+
+            const listS = document.getElementById('list-storting');
+            if(listS) {
+                listS.innerHTML = db.pinjaman.filter(l => l.totalRemaining > 0 || (l.history && l.history.some(h => h.date.startsWith(filterDate)))).map(l => {
+                    const paidOnFilter = (l.history || []).filter(h => h.date.split('T')[0] === filterDate).reduce((a,b) => a+b.amount, 0);
+                    return `
+                    <tr>
+                        <td class="px-6 py-4 font-bold text-slate-700">${l.memberName}</td>
+                        <td class="px-6 py-4 text-right font-bold text-blue-600">${formatIDR(l.dailyPayment)}</td>
+                        <td class="px-6 py-4 text-right font-bold ${paidOnFilter > 0 ? 'text-emerald-600' : 'text-slate-200'}">${paidOnFilter > 0 ? formatIDR(paidOnFilter) : 'B. Bayar'}</td>
+                        <td class="px-6 py-4 text-center flex items-center justify-center gap-2">
+                            <button onclick="openHistoryModal('${l.id}')" class="bg-slate-100 text-slate-500 w-8 h-8 rounded-lg flex items-center justify-center text-xs hover:bg-slate-200"><i class="fas fa-history"></i></button>
+                            <button onclick="openPaymentModal('${l.id}')" class="bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold shadow-sm shadow-emerald-100">STOR</button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+
+            const listAnggota = document.getElementById('list-anggota');
+            if(listAnggota) listAnggota.innerHTML = db.anggota.map(m => `<tr><td class="px-6 py-4 font-bold text-sm">${m.name}</td><td class="px-6 py-4 text-xs text-slate-500">${m.address}</td><td class="px-6 py-4 text-center"><button onclick="deleteMember('${m.id}')" class="text-slate-200 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
+
+            const listPinjaman = document.getElementById('list-pinjaman');
+            if(listPinjaman) listPinjaman.innerHTML = db.pinjaman.filter(l => l.totalRemaining > 0).map(l => `<tr><td class="px-6 py-4 font-bold text-xs text-slate-700">${l.memberName}</td><td class="px-6 py-4 text-right font-black text-blue-600 text-xs">${formatIDR(l.totalRemaining)}</td><td class="px-6 py-4 text-center"><button onclick="deleteLoan('${l.id}')" class="text-slate-200 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
+
+            const listKB = document.getElementById('list-kasbon');
+            if(listKB) listKB.innerHTML = db.kasbon.map(k => `<tr><td class="px-6 py-4 text-[10px] text-slate-400">${new Date(k.date).toLocaleDateString('id-ID')}</td><td class="px-6 py-4 font-bold text-slate-700">${k.name}</td><td class="px-6 py-4 text-right font-black text-orange-600">${formatIDR(k.amount)}</td><td class="px-6 py-4 text-center"><button onclick="deleteKasbon('${k.id}')" class="text-slate-200 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
+
+            const listTP = document.getElementById('list-titipan');
+            if(listTP) listTP.innerHTML = db.titipan.map(k => `<tr><td class="px-6 py-4 text-[10px] text-slate-400">${new Date(k.date).toLocaleDateString('id-ID')}</td><td class="px-6 py-4 font-bold text-slate-700">${k.name}</td><td class="px-6 py-4 text-right font-black text-purple-600">${formatIDR(k.amount)}</td><td class="px-6 py-4 text-center"><button onclick="deleteTitipan('${k.id}')" class="text-slate-200 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
+
+            const sel = document.getElementById('loan-member');
+            if(sel) sel.innerHTML = '<option value="">Pilih Anggota</option>' + db.anggota.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+        }
+
+        function openHistoryModal(id) {
+            const loan = db.pinjaman.find(l => l.id === id);
+            const history = loan.history || [];
+            document.getElementById('history-loan-name').innerText = loan.memberName;
+            document.getElementById('history-total-paid').innerText = formatIDR(history.reduce((a, b) => a + b.amount, 0));
+            document.getElementById('history-list-body').innerHTML = history.length === 0 ? `<tr><td colspan="2" class="px-6 py-10 text-center text-slate-400 text-xs italic">Belum ada riwayat.</td></tr>` : history.sort((a,b) => new Date(b.date)-new Date(a.date)).map(h => `<tr><td class="px-6 py-4 text-xs text-slate-500">${new Date(h.date).toLocaleDateString('id-ID', { dateStyle: 'medium' })}</td><td class="px-6 py-4 text-right font-black text-slate-700">${formatIDR(h.amount)}</td></tr>`).join('');
+            document.getElementById('modal-history').classList.add('modal-active');
+        }
+        function closeHistoryModal() { document.getElementById('modal-history').classList.remove('modal-active'); }
+
+        function updateLoanSimulation() {
+            const amount = parseFloat(document.getElementById('loan-amount').value) || 0;
+            const term = parseInt(document.getElementById('loan-term').value) || 1;
+            const interest = parseFloat(document.getElementById('loan-interest').value) || 0;
+            const keterima = amount - (amount * 0.10);
+            const total = amount + (amount * (interest/100));
+            document.getElementById('sim-admin').innerText = formatIDR(amount * 0.05);
+            document.getElementById('sim-tabungan').innerText = formatIDR(amount * 0.05);
+            document.getElementById('sim-keterima').innerText = formatIDR(keterima);
+            document.getElementById('sim-angsuran').innerText = formatIDR(total/term);
+        }
 
         document.getElementById('form-kas').addEventListener('submit', (e) => {
             e.preventDefault();
-            db.kas.push({
-                id: Date.now(),
-                desc: document.getElementById('kas-desc').value,
-                type: document.getElementById('kas-type').value,
-                amount: parseFloat(document.getElementById('kas-amount').value),
-                date: new Date().toISOString()
-            });
-            saveData();
-            e.target.reset();
+            db.kas.push({ id: Date.now(), desc: document.getElementById('kas-desc').value, type: document.getElementById('kas-type').value, amount: parseFloat(document.getElementById('kas-amount').value), date: new Date().toISOString() });
+            saveData(); e.target.reset();
         });
 
         document.getElementById('form-anggota').addEventListener('submit', (e) => {
             e.preventDefault();
-            db.anggota.push({
-                id: 'MEM-' + Date.now(),
-                name: document.getElementById('member-name').value,
-                phone: document.getElementById('member-phone').value,
-                address: document.getElementById('member-address').value
-            });
-            saveData();
-            e.target.reset();
-            alert('Anggota berhasil didaftarkan!');
+            db.anggota.push({ id: 'MEM-'+Date.now(), name: document.getElementById('member-name').value, phone: document.getElementById('member-phone').value, address: document.getElementById('member-address').value });
+            saveData(); e.target.reset();
         });
 
         document.getElementById('form-pinjaman').addEventListener('submit', (e) => {
             e.preventDefault();
-            const memberId = document.getElementById('loan-member').value;
-            if(!memberId) return alert('Pilih Anggota dulu!');
-
-            const member = db.anggota.find(m => m.id === memberId);
-            const data = calculateLoan();
-
-            db.pinjaman.push({
-                id: 'LOAN-' + Date.now(),
-                memberId: member.id,
-                memberName: member.name,
-                pokok: data.pokok,
-                totalInitial: data.totalTagihan,
-                totalRemaining: data.totalTagihan,
-                dailyPayment: data.angsuran,
-                termInitial: data.tenor,
-                termRemaining: data.tenor,
-                startDate: new Date().toISOString(),
-                history: []
-            });
-
-            db.kas.push({
-                id: Date.now(),
-                desc: `Pencairan: ${member.name} (Netto)`,
-                type: 'kredit',
-                amount: data.diterima,
-                date: new Date().toISOString()
-            });
-
-            db.kas.push({ id: Date.now()+1, desc: `Admin Pinjaman: ${member.name}`, type: 'debet', amount: data.admin, date: new Date().toISOString(), category: 'admin' });
-            db.kas.push({ id: Date.now()+2, desc: `Tabungan Anggota: ${member.name}`, type: 'debet', amount: data.tabungan, date: new Date().toISOString(), category: 'tabungan' });
-
-            saveData();
-            e.target.reset();
-            alert('Pinjaman berhasil dicairkan!');
+            const member = db.anggota.find(m => m.id === document.getElementById('loan-member').value);
+            const amount = parseFloat(document.getElementById('loan-amount').value);
+            const term = parseInt(document.getElementById('loan-term').value);
+            const interest = parseFloat(document.getElementById('loan-interest').value);
+            const dateInput = document.getElementById('loan-date').value;
+            const ts = dateInput ? new Date(dateInput + "T" + new Date().toTimeString().split(' ')[0]).toISOString() : new Date().toISOString();
+            const total = amount + (amount * (interest/100));
+            const keterima = amount - (amount * 0.10);
+            db.pinjaman.push({ id: 'LN-'+Date.now(), memberId: member.id, memberName: member.name, pokok: amount, interest, keterima, totalRemaining: total, dailyPayment: total/term, startDate: ts, history: [] });
+            db.kas.push({ id: Date.now(), desc: `Cair: ${member.name}`, type: 'kredit', amount: keterima, date: ts });
+            saveData(); e.target.reset();
         });
 
-        function getLoanStatus(l) {
-            if (l.totalRemaining <= 0) return { label: 'Lancar', color: 'bg-emerald-500', text: 'text-emerald-500' };
-            if (l.termRemaining <= 0) return { label: 'Macet', color: 'bg-rose-500', text: 'text-rose-500' };
-            return { label: 'Berjalan', color: 'bg-blue-500', text: 'text-blue-500' };
-        }
+        document.getElementById('form-kasbon').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const dateInput = document.getElementById('kb-date').value;
+            const amount = parseFloat(document.getElementById('kb-amount').value);
+            const name = document.getElementById('kb-name').value;
+            const ts = new Date(dateInput + "T" + new Date().toTimeString().split(' ')[0]).toISOString();
+            db.kasbon.push({ id: 'KB-'+Date.now(), name, amount, date: ts });
+            db.kas.push({ id: Date.now(), desc: `Kasbon: ${name}`, type: 'kredit', amount, date: ts });
+            saveData(); e.target.reset();
+        });
 
-        function initData() {
-            document.getElementById('header-date').innerText = new Date().toLocaleDateString('id-ID', { dateStyle: 'full' });
-            
-            // Render Members Table
-            const listAnggota = document.getElementById('list-anggota');
-            if(listAnggota) {
-                listAnggota.innerHTML = db.anggota.map(m => `
-                    <tr>
-                        <td class="px-6 py-4 font-bold text-slate-800">${m.name}</td>
-                        <td class="px-6 py-4 text-sm text-blue-600 font-medium">${m.phone}</td>
-                        <td class="px-6 py-4 text-sm text-slate-500">${m.address}</td>
-                        <td class="px-6 py-4 text-center">
-                            <button onclick="deleteMember('${m.id}')" class="text-slate-300 hover:text-rose-500 transition-colors">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
-                if(db.anggota.length === 0) listAnggota.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Belum ada anggota terdaftar</td></tr>';
-            }
+        document.getElementById('form-titipan').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const dateInput = document.getElementById('tp-date').value;
+            const amount = parseFloat(document.getElementById('tp-amount').value);
+            const name = document.getElementById('tp-name').value;
+            const ts = new Date(dateInput + "T" + new Date().toTimeString().split(' ')[0]).toISOString();
+            db.titipan.push({ id: 'TP-'+Date.now(), name, amount, date: ts });
+            db.kas.push({ id: Date.now(), desc: `Titipan: ${name}`, type: 'debet', amount, date: ts });
+            saveData(); e.target.reset();
+        });
 
-            // Render Members Select
-            const select = document.getElementById('loan-member');
-            if(select) {
-                select.innerHTML = '<option value="">Pilih Anggota</option>' + 
-                db.anggota.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
-            }
-
-            // Render Kas
-            document.getElementById('list-kas').innerHTML = db.kas.slice(-15).reverse().map(t => `
-                <tr>
-                    <td class="px-6 py-4 text-xs font-medium text-slate-500">${new Date(t.date).toLocaleDateString()}</td>
-                    <td class="px-6 py-4 font-semibold text-sm">${t.desc}</td>
-                    <td class="px-6 py-4 text-right font-black ${t.type === 'debet' ? 'text-emerald-600' : 'text-rose-600'}">${formatIDR(t.amount)}</td>
-                    <td class="px-6 py-4 text-center">
-                        <button onclick="deleteKas(${t.id})" class="text-slate-300 hover:text-rose-500 transition-colors">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-
-            // PENCARIAN LOGIC
-            const searchQuery = (document.getElementById('search-pinjaman')?.value || "").toLowerCase();
-
-            // Pinjaman Stats for Summary Boxes
-            let sMacetC = 0, sMacetA = 0;
-            let sLancarC = 0;
-            let sJalanC = 0, sJalanA = 0;
-
-            // Render Pinjaman Table with Filter
-            document.getElementById('list-pinjaman').innerHTML = db.pinjaman
-            .filter(l => {
-                const status = getLoanStatus(l);
-                const nameMatch = l.memberName.toLowerCase().includes(searchQuery);
-                const statusMatch = status.label.toLowerCase().includes(searchQuery);
-                return nameMatch || statusMatch;
-            })
-            .map(l => {
-                const status = getLoanStatus(l);
-                
-                if (status.label === 'Lancar') {
-                    sLancarC++;
-                } else if (status.label === 'Macet') {
-                    sMacetC++;
-                    sMacetA += l.totalRemaining;
-                } else {
-                    sJalanC++;
-                    sJalanA += l.totalRemaining;
-                }
-
-                return `
-                    <tr class="${l.totalRemaining <= 0 ? 'bg-slate-50/50' : ''}">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="px-2 py-0.5 rounded-full ${status.color} text-[8px] font-black text-white uppercase tracking-tighter">${status.label}</span>
-                                <div class="font-bold text-slate-900">${l.memberName}</div>
-                            </div>
-                            <div class="text-[10px] text-slate-400 font-medium">${new Date(l.startDate).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'})}</div>
-                            <div class="mt-1 text-[10px] text-blue-600 font-bold uppercase">Harian: ${formatIDR(l.dailyPayment)}</div>
-                        </td>
-                        <td class="px-6 py-4 text-right font-black ${l.totalRemaining <= 0 ? 'text-emerald-600' : 'text-rose-600'}">
-                            ${formatIDR(l.totalRemaining)}
-                        </td>
-                        <td class="px-6 py-4 text-right font-bold ${l.termRemaining <= 0 && l.totalRemaining > 0 ? 'text-rose-600' : 'text-slate-700'}">
-                            ${Math.max(0, Math.ceil(l.termRemaining))} Hari
-                        </td>
-                        <td class="px-6 py-4 text-center space-x-2">
-                            <button onclick="viewHistory('${l.id}')" title="Lihat Histori" class="bg-slate-100 text-slate-600 p-2 rounded-lg hover:bg-slate-200 transition-colors">
-                                <i class="fas fa-history"></i>
-                            </button>
-                            ${l.totalRemaining > 0 ? `<button onclick="openPaymentModal('${l.id}')" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-700">BAYAR</button>` : ''}
-                            <button onclick="deleteLoan('${l.id}')" title="Hapus Pinjaman" class="text-slate-300 hover:text-rose-500 p-2 transition-colors">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-
-            // Update Summary Boxes Labels
-            document.getElementById('stat-macet-count').innerText = `${db.pinjaman.filter(l => getLoanStatus(l).label === 'Macet').length} Jiwa`;
-            document.getElementById('stat-macet-amount').innerText = formatIDR(db.pinjaman.filter(l => getLoanStatus(l).label === 'Macet').reduce((a,b) => a + b.totalRemaining, 0));
-            
-            document.getElementById('stat-lancar-count').innerText = `${db.pinjaman.filter(l => getLoanStatus(l).label === 'Lancar').length} Jiwa`;
-            
-            document.getElementById('stat-berjalan-count').innerText = `${db.pinjaman.filter(l => getLoanStatus(l).label === 'Berjalan').length} Jiwa`;
-            document.getElementById('stat-berjalan-amount').innerText = formatIDR(db.pinjaman.filter(l => getLoanStatus(l).label === 'Berjalan').reduce((a,b) => a + b.totalRemaining, 0));
-
-            // Update Statistics Home
-            const totalMasuk = db.kas.filter(t => t.type === 'debet').reduce((a,b) => a + b.amount, 0);
-            const totalKeluar = db.kas.filter(t => t.type === 'kredit').reduce((a,b) => a + b.amount, 0);
-            const piutang = db.pinjaman.reduce((a, b) => a + b.totalRemaining, 0);
-            const totalPokokPinjaman = db.pinjaman.reduce((a, b) => a + (b.pokok || 0), 0);
-            const totalTabungan = db.kas.filter(t => t.category === 'tabungan').reduce((a,b) => a + b.amount, 0);
-            const totalAdmin = db.kas.filter(t => t.category === 'admin').reduce((a,b) => a + b.amount, 0);
-
-            document.getElementById('kas-saldo').innerText = formatIDR(piutang);
-            document.getElementById('kas-total-pinjaman').innerText = formatIDR(totalPokokPinjaman);
-            document.getElementById('kas-masuk').innerText = formatIDR(totalMasuk);
-            document.getElementById('kas-keluar').innerText = formatIDR(totalKeluar);
-            document.getElementById('stat-tabungan').innerText = formatIDR(totalTabungan);
-            document.getElementById('stat-admin').innerText = formatIDR(totalAdmin);
-        }
-
-        // --- LAPORAN LOGIC ---
-        function updateReports() {
-            const piutangAktif = db.pinjaman.reduce((a, b) => a + (b.totalRemaining || 0), 0);
-            const totalPinjamanPokok = db.pinjaman.reduce((a, b) => a + (b.pokok || 0), 0);
-            const totalPinjamanLunas = db.pinjaman.filter(l => l.totalRemaining <= 0).length;
-            const totalAnggota = db.anggota.length;
-
-            const totalAdmin = db.kas.filter(t => t.category === 'admin').reduce((a,b) => a + b.amount, 0);
-            const totalTabungan = db.kas.filter(t => t.category === 'tabungan').reduce((a,b) => a + b.amount, 0);
-            
-            const totalBungaPotential = db.pinjaman.reduce((a, b) => a + (b.totalInitial - b.pokok), 0);
-            
-            const container = document.getElementById('report-summary');
-            const detailContainer = document.getElementById('kas-stats-detail');
-
-            const reportData = [
-                { label: 'Piutang Aktif', value: formatIDR(piutangAktif), color: 'text-blue-600', bg: 'bg-blue-50', icon: 'fa-hand-holding-dollar' },
-                { label: 'Total Pokok Terpancar', value: formatIDR(totalPinjamanPokok), color: 'text-indigo-600', bg: 'bg-indigo-50', icon: 'fa-money-bill-trend-up' },
-                { label: 'Profit (Admin)', value: formatIDR(totalAdmin), color: 'text-amber-600', bg: 'bg-amber-50', icon: 'fa-chart-line' },
-                { label: 'Total Tabungan', value: formatIDR(totalTabungan), color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'fa-piggy-bank' }
-            ];
-
-            container.innerHTML = reportData.map(d => `
-                <div class="${d.bg} p-6 rounded-2xl border border-white shadow-sm transition-transform hover:scale-[1.02]">
-                    <div class="w-10 h-10 ${d.color} mb-4 flex items-center justify-center rounded-full bg-white shadow-sm">
-                        <i class="fas ${d.icon}"></i>
-                    </div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">${d.label}</p>
-                    <h3 class="text-xl font-black ${d.color}">${d.value}</h3>
-                </div>
-            `).join('');
-
-            detailContainer.innerHTML = `
-                <div class="flex justify-between items-center py-2 border-b border-slate-200/50">
-                    <span class="text-sm font-medium text-slate-600">Total Anggota Terdaftar</span>
-                    <span class="text-sm font-bold text-slate-900">${totalAnggota} Jiwa</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-slate-200/50">
-                    <span class="text-sm font-medium text-slate-600">Pinjaman Lunas</span>
-                    <span class="text-sm font-bold text-emerald-600">${totalPinjamanLunas} Berkas</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-slate-200/50">
-                    <span class="text-sm font-medium text-slate-600">Potensi Bunga Pinjaman</span>
-                    <span class="text-sm font-bold text-slate-900">${formatIDR(totalBungaPotential)}</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-slate-200/50">
-                    <span class="text-sm font-medium text-slate-600">Rata-rata Tagihan Harian</span>
-                    <span class="text-sm font-bold text-blue-600">${formatIDR(db.pinjaman.filter(l => l.totalRemaining > 0).reduce((a,b) => a + b.dailyPayment, 0))}</span>
-                </div>
-            `;
-        }
-
-        // PAYMENT MODAL
         let activeLoanId = null;
         function openPaymentModal(id) {
             activeLoanId = id;
             const l = db.pinjaman.find(x => x.id === id);
-            document.getElementById('modal-loan-name').innerText = l.memberName;
+            document.getElementById('modal-loan-name').innerText = "Nasabah: " + l.memberName;
             document.getElementById('payment-input-amount').value = Math.round(l.dailyPayment);
             document.getElementById('modal-payment').classList.add('modal-active');
         }
         function closePaymentModal() { document.getElementById('modal-payment').classList.remove('modal-active'); }
-
         function processPayment() {
             const amt = parseFloat(document.getElementById('payment-input-amount').value);
+            const filterDateVal = document.getElementById('filter-storting-date').value || getTodayStr();
             const loan = db.pinjaman.find(l => l.id === activeLoanId);
-            
+            const ts = filterDateVal + "T" + new Date().toTimeString().split(' ')[0];
             loan.totalRemaining -= amt;
-            loan.termRemaining -= (amt / loan.dailyPayment);
-            
             if(!loan.history) loan.history = [];
-            loan.history.push({
-                date: new Date().toISOString(),
-                amount: amt,
-                remainingBalance: Math.max(0, loan.totalRemaining),
-                remainingTerm: Math.max(0, Math.ceil(loan.termRemaining))
-            });
-
-            db.kas.push({
-                id: Date.now(),
-                desc: `Setoran Harian: ${loan.memberName}`,
-                type: 'debet',
-                amount: amt,
-                date: new Date().toISOString()
-            });
-
-            saveData();
-            closePaymentModal();
+            loan.history.push({ date: ts, amount: amt });
+            db.kas.push({ id: Date.now(), desc: `Storting: ${loan.memberName}`, type: 'debet', amount: amt, date: ts });
+            saveData(); closePaymentModal();
         }
 
-        // HISTORY & WHATSAPP
-        function viewHistory(id) {
-            const loan = db.pinjaman.find(l => l.id === id);
-            const historyList = loan.history || [];
-            const content = document.getElementById('history-content');
-            document.getElementById('history-loan-member').innerText = loan.memberName;
-            
-            if(historyList.length === 0) {
-                content.innerHTML = '<p class="text-center text-slate-400 py-10 text-sm">Belum ada catatan setoran.</p>';
-            } else {
-                content.innerHTML = historyList.slice().reverse().map((h, idx) => `
-                    <div class="grid grid-cols-5 gap-2 px-4 py-4 items-center hover:bg-slate-50 transition-colors">
-                        <div class="col-span-1">
-                            <p class="text-[10px] font-bold text-slate-800">${new Date(h.date).toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'})}</p>
-                            <p class="text-[9px] text-slate-400">${new Date(h.date).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</p>
-                        </div>
-                        <div class="col-span-1 text-right text-[10px] font-black text-emerald-600">${formatIDR(h.amount)}</div>
-                        <div class="col-span-1 text-right text-[10px] font-bold text-rose-500">${formatIDR(h.remainingBalance || 0)}</div>
-                        <div class="col-span-1 text-right text-[10px] font-medium text-slate-600">${h.remainingTerm || 0} Hr</div>
-                        <div class="col-span-1 text-center">
-                            <button onclick="shareToWhatsApp('${loan.id}', '${h.date}')" class="bg-emerald-100 text-emerald-700 w-8 h-8 rounded-full hover:bg-emerald-200 transition-all">
-                                <i class="fab fa-whatsapp text-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            document.getElementById('modal-history').classList.add('modal-active');
-        }
-
-        function shareToWhatsApp(loanId, historyDate) {
-            const loan = db.pinjaman.find(l => l.id === loanId);
-            const member = db.anggota.find(m => m.id === loan.memberId);
-            const history = loan.history.find(h => h.date === historyDate);
-            
-            const dateStr = new Date(history.date).toLocaleDateString('id-ID', { dateStyle: 'full' });
-            const timeStr = new Date(history.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-
-            const message = `*KWITANSI DIGITAL SETORAN HARIAN*%0A` +
-                            `*Koperasi Abadi Lestari Mandiri*%0A` +
-                            `------------------------------------------%0A` +
-                            `Nama: *${loan.memberName}*%0A` +
-                            `Tanggal: ${dateStr}%0A` +
-                            `Jam: ${timeStr}%0A%0A` +
-                            `*RINCIAN TRANSAKSI*%0A` +
-                            `Setoran: *${formatIDR(history.amount)}*%0A` +
-                            `Sisa Tagihan: *${formatIDR(history.remainingBalance)}*%0A` +
-                            `Sisa Tenor: *${history.remainingTerm} Hari*%0A` +
-                            `------------------------------------------%0A` +
-                            `_Terima kasih telah melakukan pembayaran tepat waktu. Simpan pesan ini sebagai bukti setoran yang sah._`;
-
-            const phone = member ? member.phone : '';
-            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
-        }
-
-        function closeHistoryModal() { document.getElementById('modal-history').classList.remove('modal-active'); }
-        function deleteKas(id) { if(confirm('Hapus transaksi?')) { db.kas = db.kas.filter(t => t.id !== id); saveData(); } }
-        function deleteMember(id) { if(confirm('Hapus anggota ini?')) { db.anggota = db.anggota.filter(m => m.id !== id); saveData(); } }
-        
-        // Hapus Pinjaman
-        function deleteLoan(id) {
-            if(confirm('Apakah Anda yakin ingin menghapus data pinjaman ini? Tindakan ini tidak dapat dibatalkan.')) {
-                db.pinjaman = db.pinjaman.filter(l => l.id !== id);
-                saveData();
-            }
-        }
+        function deleteKas(id) { if(confirm('Hapus?')) { db.kas = db.kas.filter(t => t.id !== id); saveData(); } }
+        function deleteMember(id) { if(confirm('Hapus?')) { db.anggota = db.anggota.filter(m => m.id !== id); saveData(); } }
+        function deleteLoan(id) { if(confirm('Hapus?')) { db.pinjaman = db.pinjaman.filter(l => l.id !== id); saveData(); } }
+        function deleteKasbon(id) { if(confirm('Hapus?')) { db.kasbon = db.kasbon.filter(k => k.id !== id); saveData(); } }
+        function deleteTitipan(id) { if(confirm('Hapus?')) { db.titipan = db.titipan.filter(t => t.id !== id); saveData(); } }
 
         function exportToExcel() {
-            const worksheet = XLSX.utils.json_to_sheet(db.kas);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Buku Kas");
-            XLSX.writeFile(workbook, `Laporan_Koperasi_${new Date().toISOString().split('T')[0]}.xlsx`);
+            const ws = XLSX.utils.json_to_sheet(db.kas);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Kas");
+            XLSX.writeFile(wb, "Laporan_Koperasi_Global.xlsx");
         }
 
-        window.onload = initData;
+        window.onload = () => {
+            document.getElementById('filter-storting-date').value = getTodayStr();
+            initData();
+        };
     </script>
 </body>
 </html>
