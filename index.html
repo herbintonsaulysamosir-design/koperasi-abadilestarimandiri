@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Koperasi Digital Pro + Kasbon & Titipan</title>
+    <title>Sistem Koperasi Digital Pro + AI Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -34,6 +34,11 @@
             #print-area { position: absolute; left: 0; top: 0; width: 100%; }
             .no-print { display: none !important; }
         }
+
+        /* Chatbot Style */
+        #ai-chat-window {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
@@ -51,8 +56,8 @@
                 </div>
             </div>
             <div class="flex gap-2">
-                <button onclick="openAIChat()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ai-glow">
-                    <i class="fas fa-sparkles text-[10px]"></i> ✨ Tanya AI
+                <button onclick="toggleAIChat()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ai-glow">
+                    <i class="fas fa-robot text-[10px]"></i> ✨ Tanya AI
                 </button>
             </div>
         </div>
@@ -104,7 +109,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Dropan Section -->
                 <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm uppercase">
@@ -128,11 +132,16 @@
                     </div>
                 </div>
 
-                <!-- Summary Sections -->
                 <div class="grid grid-cols-1 gap-4">
-                    <div class="bg-blue-600 p-6 rounded-3xl text-white shadow-xl shadow-blue-200">
-                        <p class="text-blue-100 text-[10px] font-bold uppercase tracking-wider mb-1">Total Piutang Aktif</p>
-                        <h2 id="dash-piutang" class="text-2xl font-black">Rp 0</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-600 p-6 rounded-3xl text-white shadow-xl shadow-blue-200">
+                            <p class="text-blue-100 text-[10px] font-bold uppercase tracking-wider mb-1">Total Piutang Aktif</p>
+                            <h2 id="dash-piutang" class="text-xl font-black">Rp 0</h2>
+                        </div>
+                        <div class="bg-rose-600 p-6 rounded-3xl text-white shadow-xl shadow-rose-200">
+                            <p class="text-rose-100 text-[10px] font-bold uppercase tracking-wider mb-1">Total Kemacetan (J. Tempo)</p>
+                            <h2 id="dash-macet" class="text-xl font-black">Rp 0</h2>
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-white p-6 rounded-3xl border border-slate-200">
@@ -315,7 +324,6 @@
                 <i class="fas fa-arrow-left text-xs"></i> Kembali
             </button>
 
-            <!-- Summary Storting -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                     <div>
@@ -349,7 +357,7 @@
                             <tr>
                                 <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Nama Anggota</th>
                                 <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-right">Tagihan Harian</th>
-                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-right">Setor Tgl Terpilih</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-right">Status / Setoran</th>
                                 <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -441,7 +449,6 @@
                 <i class="fas fa-arrow-left text-xs"></i> Kembali
             </button>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Saldo Tunai Global -->
                 <div class="bg-white p-8 rounded-3xl shadow-md border border-slate-200">
                     <h3 class="text-lg font-bold text-indigo-600 uppercase mb-6">Arus Kas di Tangan (Global)</h3>
                     <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100">
@@ -451,7 +458,6 @@
                     <p class="text-xs text-slate-400 mt-4 italic">*Hasil dari seluruh pemasukan dikurangi seluruh pengeluaran.</p>
                 </div>
 
-                <!-- Perhitungan Hari Ini -->
                 <div class="bg-white p-8 rounded-3xl shadow-md border border-slate-200">
                     <h3 class="text-lg font-bold text-slate-800 uppercase mb-6">Kalkulasi Tunai Hari Ini</h3>
                     <div class="space-y-3">
@@ -495,7 +501,40 @@
                 </button>
             </div>
         </div>
+
     </main>
+
+    <!-- AI CHAT WINDOW (Floating) -->
+    <div id="ai-chat-window" class="fixed bottom-6 right-6 w-[350px] md:w-[400px] h-[500px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col z-[200] hidden overflow-hidden">
+        <!-- HEADER WITH X BUTTON -->
+        <div class="p-4 flex items-center justify-between bg-indigo-600 text-white shrink-0">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-robot text-xs"></i>
+                </div>
+                <h3 class="font-bold text-sm">AI Assistant</h3>
+            </div>
+            <!-- BUTTON X YANG DIPERBAIKI -->
+            <button onclick="toggleAIChat()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-all cursor-pointer" title="Tutup Chat">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+        
+        <div id="ai-messages" class="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-white">
+            <div class="bg-slate-100 p-3 rounded-2xl rounded-tl-none mr-8 text-slate-700">
+                Halo! Saya AI asisten Anda. Saya memiliki akses ke data koperasi Anda saat ini. Ada yang bisa saya bantu analisis?
+            </div>
+        </div>
+        
+        <div class="p-4 border-t border-slate-100 bg-white">
+            <div class="flex gap-2">
+                <input type="text" id="ai-input" placeholder="Tanyakan sesuatu..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button onclick="askAI()" id="btn-ask-ai" class="bg-indigo-600 text-white w-10 h-10 rounded-xl flex items-center justify-center hover:bg-indigo-700 transition-all">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODALS -->
     <div id="modal-payment" class="fixed inset-0 bg-slate-900/50 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm no-print">
@@ -541,6 +580,8 @@
     </div>
 
     <script>
+        const apiKey = ""; // Disediakan oleh environment
+
         let db = {
             kas: JSON.parse(localStorage.getItem('koperasi_kas')) || [],
             anggota: JSON.parse(localStorage.getItem('koperasi_members')) || [],
@@ -567,14 +608,113 @@
             initData();
         }
 
+        function getNasabahStatus(loan) {
+            if (loan.totalRemaining <= 0) return { label: 'Lunas', color: 'bg-emerald-100 text-emerald-700' };
+            const startDate = new Date(loan.startDate);
+            const today = new Date();
+            startDate.setHours(0,0,0,0);
+            today.setHours(0,0,0,0);
+            const diffTime = today - startDate;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+            if (diffDays >= (loan.term || 24)) return { label: 'Jatuh Tempo', color: 'bg-rose-100 text-rose-700' };
+            return { label: 'Berjalan', color: 'bg-blue-100 text-blue-700' };
+        }
+
+        // AI FEATURES
+        function toggleAIChat() {
+            const chat = document.getElementById('ai-chat-window');
+            chat.classList.toggle('hidden');
+            if(!chat.classList.contains('hidden')) {
+                document.getElementById('ai-input').focus();
+            }
+        }
+
+        async function askAI() {
+            const input = document.getElementById('ai-input');
+            const userMsg = input.value.trim();
+            if (!userMsg) return;
+
+            const messagesContainer = document.getElementById('ai-messages');
+            messagesContainer.innerHTML += `
+                <div class="bg-indigo-50 p-3 rounded-2xl rounded-tr-none ml-8 text-indigo-700 font-medium">
+                    ${userMsg}
+                </div>
+            `;
+            input.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            const btn = document.getElementById('btn-ask-ai');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+
+            const context = {
+                total_anggota: db.anggota.length,
+                total_piutang: db.pinjaman.reduce((a,b) => a+b.totalRemaining, 0),
+                total_macet: db.pinjaman.filter(l => getNasabahStatus(l).label === 'Jatuh Tempo').reduce((a,b) => a+b.totalRemaining, 0),
+                kas_tunai: db.kas.reduce((a,b) => b.type === 'debet' ? a + b.amount : a - b.amount, 0),
+                summary_harian: {
+                    storting_hari_ini: db.kas.filter(t => t.date.startsWith(getTodayStr()) && t.desc.includes('Storting')).reduce((a,b) => a+b.amount, 0)
+                }
+            };
+
+            const systemPrompt = `Anda adalah asisten AI Koperasi Abadi Lestari Mandiri. Gunakan data ini: ${JSON.stringify(context)}. Jawab profesional dan ringkas dalam Bahasa Indonesia.`;
+
+            try {
+                let retryCount = 0;
+                const callAPI = async () => {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: userMsg }] }],
+                            systemInstruction: { parts: [{ text: systemPrompt }] }
+                        })
+                    });
+                    return res.json();
+                };
+
+                const executeWithRetry = async () => {
+                    try {
+                        return await callAPI();
+                    } catch (e) {
+                        if (retryCount < 5) {
+                            await new Promise(r => setTimeout(r, Math.pow(2, retryCount) * 1000));
+                            retryCount++;
+                            return executeWithRetry();
+                        }
+                        throw e;
+                    }
+                };
+
+                const data = await executeWithRetry();
+                const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, saya tidak bisa memproses permintaan saat ini.";
+
+                messagesContainer.innerHTML += `
+                    <div class="bg-slate-100 p-3 rounded-2xl rounded-tl-none mr-8">
+                        ${aiResponse.replace(/\n/g, '<br>')}
+                    </div>
+                `;
+            } catch (err) {
+                messagesContainer.innerHTML += `
+                    <div class="bg-rose-50 p-3 rounded-2xl rounded-tl-none mr-8 text-rose-600 italic">
+                        Terjadi gangguan. Silakan coba lagi.
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        document.getElementById('ai-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') askAI(); });
+
+        // DATA LOGIC
         function initData() {
             const now = new Date();
             const realTodayStr = getTodayStr(); 
             const filterDateVal = document.getElementById('filter-storting-date').value || realTodayStr;
             
-            const isViewingToday = (filterDateVal === realTodayStr);
-            document.getElementById('storting-today-label').innerText = isViewingToday ? "Storting Hari Ini" : `Storting Tgl ${new Date(filterDateVal).toLocaleDateString('id-ID')}`;
-
             document.getElementById('header-date').innerText = now.toLocaleDateString('id-ID', { dateStyle: 'full' });
             if(document.getElementById('dropan-month')) {
                 document.getElementById('dropan-month').innerText = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }).toUpperCase();
@@ -587,30 +727,20 @@
             const totalTitipan = db.titipan.reduce((a, b) => a + b.amount, 0);
             const tunai = totalMasuk - totalKeluar;
 
-            const stortingFiltered = db.kas
-                .filter(t => t.type === 'debet' && t.desc.includes('Storting') && t.date.split('T')[0] === filterDateVal)
-                .reduce((a, b) => a + b.amount, 0);
+            const totalMacet = db.pinjaman.filter(l => getNasabahStatus(l).label === 'Jatuh Tempo').reduce((a, b) => a + b.totalRemaining, 0);
 
-            const stortingMonthTotal = db.kas
-                .filter(t => {
-                    const tDate = new Date(t.date);
-                    return t.type === 'debet' && 
-                           t.desc.includes('Storting') && 
-                           tDate.getMonth() === now.getMonth() && 
-                           tDate.getFullYear() === now.getFullYear();
-                })
-                .reduce((a, b) => a + b.amount, 0);
+            const stortingFiltered = db.kas.filter(t => t.type === 'debet' && t.desc.includes('Storting') && t.date.split('T')[0] === filterDateVal).reduce((a, b) => a + b.amount, 0);
+            const stortingMonthTotal = db.kas.filter(t => {
+                const tDate = new Date(t.date);
+                return t.type === 'debet' && t.desc.includes('Storting') && tDate.getMonth() === now.getMonth() && tDate.getFullYear() === now.getFullYear();
+            }).reduce((a, b) => a + b.amount, 0);
 
             document.getElementById('storting-today-total').innerText = formatIDR(stortingFiltered);
             document.getElementById('storting-month-total').innerText = formatIDR(stortingMonthTotal);
 
-            // LOGIKA TUNAI HARIAN: OTOMATIS RESET 24:00 (Hanya hitung transaksi hari ini)
             const t_storting = db.kas.filter(t => t.date.startsWith(realTodayStr) && t.desc.includes('Storting')).reduce((a,b) => a+b.amount, 0);
-            
-            // FILTER HARIAN UNTUK KASBON & TITIPAN (Mendengarkan input tanggal atau default hari ini)
             const t_kasbon = db.kasbon.filter(k => k.date.startsWith(realTodayStr)).reduce((a,b) => a+b.amount, 0);
             const t_titipan = db.titipan.filter(tp => tp.date.startsWith(realTodayStr)).reduce((a,b) => a+b.amount, 0);
-            
             const t_pencairan = db.kas.filter(t => t.date.startsWith(realTodayStr) && t.desc.includes('Cair:')).reduce((a,b) => a+b.amount, 0);
             const t_result = (t_storting + t_kasbon) - (t_pencairan + t_titipan);
 
@@ -621,6 +751,7 @@
             if(document.getElementById('tunai-today-result')) document.getElementById('tunai-today-result').innerText = formatIDR(t_result);
 
             document.getElementById('dash-piutang').innerText = formatIDR(piutang);
+            document.getElementById('dash-macet').innerText = formatIDR(totalMacet);
             document.getElementById('dash-tunai').innerText = formatIDR(tunai);
             document.getElementById('dash-kasbon').innerText = formatIDR(totalKasbon);
             document.getElementById('dash-titipan').innerText = formatIDR(totalTitipan);
@@ -635,8 +766,7 @@
         function renderTables(filterDate) {
             const listKas = document.getElementById('list-kas');
             if(listKas) {
-                const sortedKas = [...db.kas].sort((a, b) => new Date(b.date) - new Date(a.date));
-                listKas.innerHTML = sortedKas.slice(0, 15).map(t => `
+                listKas.innerHTML = [...db.kas].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 15).map(t => `
                     <tr>
                         <td class="px-6 py-4 text-[10px] text-slate-400">${new Date(t.date).toLocaleDateString('id-ID')}</td>
                         <td class="px-6 py-4 text-xs font-semibold text-slate-700">${t.desc}</td>
@@ -647,16 +777,22 @@
 
             const listS = document.getElementById('list-storting');
             if(listS) {
-                listS.innerHTML = db.pinjaman.filter(l => l.totalRemaining > 0 || (l.history && l.history.some(h => h.date.startsWith(filterDate)))).map(l => {
+                listS.innerHTML = db.pinjaman.map(l => {
                     const paidOnFilter = (l.history || []).filter(h => h.date.split('T')[0] === filterDate).reduce((a,b) => a+b.amount, 0);
+                    const status = getNasabahStatus(l);
                     return `
                     <tr>
-                        <td class="px-6 py-4 font-bold text-slate-700">${l.memberName}</td>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-slate-700">${l.memberName}</div>
+                            <div class="text-[9px] mt-1"><span class="px-2 py-0.5 rounded-full font-bold uppercase ${status.color}">${status.label}</span></div>
+                        </td>
                         <td class="px-6 py-4 text-right font-bold text-blue-600">${formatIDR(l.dailyPayment)}</td>
-                        <td class="px-6 py-4 text-right font-bold ${paidOnFilter > 0 ? 'text-emerald-600' : 'text-slate-200'}">${paidOnFilter > 0 ? formatIDR(paidOnFilter) : 'B. Bayar'}</td>
+                        <td class="px-6 py-4 text-right font-bold ${paidOnFilter > 0 ? 'text-emerald-600' : 'text-slate-200'}">
+                            ${paidOnFilter > 0 ? formatIDR(paidOnFilter) : 'Belum Bayar'}
+                        </td>
                         <td class="px-6 py-4 text-center flex items-center justify-center gap-2">
                             <button onclick="openHistoryModal('${l.id}')" class="bg-slate-100 text-slate-500 w-8 h-8 rounded-lg flex items-center justify-center text-xs hover:bg-slate-200"><i class="fas fa-history"></i></button>
-                            <button onclick="openPaymentModal('${l.id}')" class="bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold shadow-sm shadow-emerald-100">STOR</button>
+                            ${l.totalRemaining > 0 ? `<button onclick="openPaymentModal('${l.id}')" class="bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold shadow-sm shadow-emerald-100">STOR</button>` : `<span class="text-[10px] font-bold text-emerald-500 uppercase">Lunas</span>`}
                         </td>
                     </tr>`;
                 }).join('');
@@ -666,7 +802,21 @@
             if(listAnggota) listAnggota.innerHTML = db.anggota.map(m => `<tr><td class="px-6 py-4 font-bold text-sm">${m.name}</td><td class="px-6 py-4 text-xs text-slate-500">${m.address}</td><td class="px-6 py-4 text-center"><button onclick="deleteMember('${m.id}')" class="text-slate-200 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
 
             const listPinjaman = document.getElementById('list-pinjaman');
-            if(listPinjaman) listPinjaman.innerHTML = db.pinjaman.filter(l => l.totalRemaining > 0).map(l => `<tr><td class="px-6 py-4 font-bold text-xs text-slate-700">${l.memberName}</td><td class="px-6 py-4 text-right font-black text-blue-600 text-xs">${formatIDR(l.totalRemaining)}</td><td class="px-6 py-4 text-center"><button onclick="deleteLoan('${l.id}')" class="text-slate-200 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
+            if(listPinjaman) {
+                listPinjaman.innerHTML = db.pinjaman.map(l => {
+                    const status = getNasabahStatus(l);
+                    return `<tr>
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-xs text-slate-700">${l.memberName}</div>
+                            <div class="text-[8px] mt-0.5 uppercase font-bold text-slate-400">Sisa: ${formatIDR(l.totalRemaining)}</div>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${status.color}">${status.label}</span>
+                        </td>
+                        <td class="px-6 py-4 text-center"><button onclick="deleteLoan('${l.id}')" class="text-slate-200 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button></td>
+                    </tr>`;
+                }).join('');
+            }
 
             const listKB = document.getElementById('list-kasbon');
             if(listKB) listKB.innerHTML = db.kasbon.map(k => `<tr><td class="px-6 py-4 text-[10px] text-slate-400">${new Date(k.date).toLocaleDateString('id-ID')}</td><td class="px-6 py-4 font-bold text-slate-700">${k.name}</td><td class="px-6 py-4 text-right font-black text-orange-600">${formatIDR(k.amount)}</td><td class="px-6 py-4 text-center"><button onclick="deleteKasbon('${k.id}')" class="text-slate-200 hover:text-rose-500"><i class="fas fa-trash-alt"></i></button></td></tr>`).join('');
@@ -714,7 +864,8 @@
 
         document.getElementById('form-pinjaman').addEventListener('submit', (e) => {
             e.preventDefault();
-            const member = db.anggota.find(m => m.id === document.getElementById('loan-member').value);
+            const memberId = document.getElementById('loan-member').value;
+            const member = db.anggota.find(m => m.id === memberId);
             const amount = parseFloat(document.getElementById('loan-amount').value);
             const term = parseInt(document.getElementById('loan-term').value);
             const interest = parseFloat(document.getElementById('loan-interest').value);
@@ -722,7 +873,19 @@
             const ts = dateInput ? new Date(dateInput + "T" + new Date().toTimeString().split(' ')[0]).toISOString() : new Date().toISOString();
             const total = amount + (amount * (interest/100));
             const keterima = amount - (amount * 0.10);
-            db.pinjaman.push({ id: 'LN-'+Date.now(), memberId: member.id, memberName: member.name, pokok: amount, interest, keterima, totalRemaining: total, dailyPayment: total/term, startDate: ts, history: [] });
+            db.pinjaman.push({ 
+                id: 'LN-'+Date.now(), 
+                memberId: member.id, 
+                memberName: member.name, 
+                pokok: amount, 
+                interest, 
+                keterima, 
+                totalRemaining: total, 
+                dailyPayment: total/term, 
+                term: term, 
+                startDate: ts, 
+                history: [] 
+            });
             db.kas.push({ id: Date.now(), desc: `Cair: ${member.name}`, type: 'kredit', amount: keterima, date: ts });
             saveData(); e.target.reset();
         });
@@ -764,6 +927,7 @@
             const loan = db.pinjaman.find(l => l.id === activeLoanId);
             const ts = filterDateVal + "T" + new Date().toTimeString().split(' ')[0];
             loan.totalRemaining -= amt;
+            if (loan.totalRemaining < 0) loan.totalRemaining = 0;
             if(!loan.history) loan.history = [];
             loan.history.push({ date: ts, amount: amt });
             db.kas.push({ id: Date.now(), desc: `Storting: ${loan.memberName}`, type: 'debet', amount: amt, date: ts });
@@ -784,7 +948,8 @@
         }
 
         window.onload = () => {
-            document.getElementById('filter-storting-date').value = getTodayStr();
+            const filterDateInput = document.getElementById('filter-storting-date');
+            if(filterDateInput) filterDateInput.value = getTodayStr();
             initData();
         };
     </script>
